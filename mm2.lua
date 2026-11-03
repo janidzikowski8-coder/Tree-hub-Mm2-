@@ -1,13 +1,21 @@
--- Jasiu Hub V2.2 | Murder Mystery 2 (Powiększone Okno Pro)
-local CoreGui = game:GetService("CoreGui")
+-- Jasiu Hub V2.2 | Murder Mystery 2 (Fix PlayerGui & Mobile Compatibility)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("JasiuHubV1") then
-    CoreGui.JasiuHubV1:Destroy()
+-- Bezpieczne pobieranie kontenera na interfejs (PlayerGui z fallbackiem na CoreGui)
+local ParentGui
+pcall(function()
+    ParentGui = LocalPlayer:WaitForChild("PlayerGui")
+end)
+if not ParentGui then
+    ParentGui = game:GetService("CoreGui")
+end
+
+if ParentGui:FindFirstChild("JasiuHubV1") then
+    ParentGui.JasiuHubV1:Destroy()
 end
 
 -- Zmienne
@@ -29,7 +37,8 @@ _G.Fake3FXOn = false
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JasiuHubV1"
-ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = ParentGui
 
 -- Główne okno (Powiększone: 400x450)
 local MainFrame = Instance.new("Frame")
@@ -131,7 +140,7 @@ OpenIcon.MouseButton1Click:Connect(function()
     OpenIcon.Visible = false
 end)
 
--- Pasek zakładek (Dopasowany do szerszego okna)
+-- Pasek zakładek
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -16, 0, 32)
 TabBar.Position = UDim2.new(0, 8, 0, 48)
@@ -167,7 +176,7 @@ end
 
 local function createTabButton(name, targetContainer)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 72, 1, 0) -- Szersze przyciski zakładek
+    btn.Size = UDim2.new(0, 72, 1, 0)
     btn.BackgroundColor3 = Color3.fromRGB(28, 36, 30)
     btn.TextColor3 = Color3.fromRGB(200, 200, 200)
     btn.TextSize = 12
@@ -518,8 +527,4 @@ RunService.Stepped:Connect(function()
                         txt.BackgroundTransparency = 1
                         txt.TextSize = 13
                         txt.Font = Enum.Font.SourceSansBold
-                        txt.Parent = bg
-                    end
-                    local t = bg:FindFirstChild("TagText")
-                    if t then
-                        t.Text = p.Name .. "\n[" .. roleStr .. "]
+                      
