@@ -1,4 +1,4 @@
--- Jasiu Hub V1 | Murder Mystery 2 (Zaawansowane Menu Mobilne)
+-- Jasiu Hub V1 | Murder Mystery 2 (Zaawansowane Menu Mobilne z Toggle & ESP Extra)
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -20,11 +20,15 @@ _G.FlySpeedVal = 50
 _G.KillAuraOn = false
 _G.KillAuraRangeVal = 10
 _G.EspRolesOn = false
+_G.EspCoinsOn = false
+_G.EspTrapsOn = false
+_G.EspNamesOn = false
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JasiuHubV1"
 ScreenGui.Parent = CoreGui
 
+-- Główne okno
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 350, 0, 420)
 MainFrame.Position = UDim2.new(0.5, -175, 0.5, -210)
@@ -46,7 +50,7 @@ TitleBar.BorderSizePixel = 0
 TitleBar.Parent = MainFrame
 
 local TitleText = Instance.new("TextLabel")
-TitleText.Size = UDim2.new(1, -40, 1, 0)
+TitleText.Size = UDim2.new(1, -70, 1, 0)
 TitleText.Position = UDim2.new(0, 12, 0, 0)
 TitleText.BackgroundTransparency = 1
 TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -56,6 +60,19 @@ TitleText.TextXAlignment = Enum.TextXAlignment.Left
 TitleText.Text = "Jasiu Hub V1 🌲 | MM2 Pro"
 TitleText.Parent = TitleBar
 
+-- Przycisk zwijania do małej ikony (Minimalizuj)
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0, 28, 0, 28)
+MinimizeBtn.Position = UDim2.new(1, -64, 0, 3)
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
+MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeBtn.Text = "-"
+MinimizeBtn.TextSize = 15
+MinimizeBtn.Font = Enum.Font.SourceSansBold
+MinimizeBtn.Parent = TitleBar
+local minC = Instance.new("UICorner") minC.CornerRadius = UDim.new(0, 5) minC.Parent = MinimizeBtn
+
+-- Przycisk zamknięcia (X)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, 28, 0, 28)
 CloseBtn.Position = UDim2.new(1, -32, 0, 3)
@@ -64,7 +81,34 @@ CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.Text = "X"
 CloseBtn.TextSize = 13
 CloseBtn.Parent = TitleBar
+local closeC = Instance.new("UICorner") closeC.CornerRadius = UDim.new(0, 5) closeC.Parent = CloseBtn
+
 CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+-- Mała ikona do ponownego otwierania menu
+local OpenIcon = Instance.new("TextButton")
+OpenIcon.Size = UDim2.new(0, 45, 0, 45)
+OpenIcon.Position = UDim2.new(0, 20, 0.2, 0)
+OpenIcon.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
+OpenIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenIcon.Text = "🌲 J"
+OpenIcon.TextSize = 14
+OpenIcon.Font = Enum.Font.SourceSansBold
+OpenIcon.Visible = false
+OpenIcon.Active = true
+OpenIcon.Draggable = true
+OpenIcon.Parent = ScreenGui
+local openC = Instance.new("UICorner") openC.CornerRadius = UDim.new(0, 8) openC.Parent = OpenIcon
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenIcon.Visible = true
+end)
+
+OpenIcon.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    OpenIcon.Visible = false
+end)
 
 -- Pasek zakładek u góry (Murder, Sheriff, Player, ESP)
 local TabBar = Instance.new("Frame")
@@ -79,14 +123,13 @@ TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 TabList.Padding = UDim.new(0, 5)
 TabList.Parent = TabBar
 
--- Kontenery na zawartość zakładek
 local Containers = {}
 local function createContainer(name)
     local sc = Instance.new("ScrollingFrame")
     sc.Size = UDim2.new(1, -16, 1, -85)
     sc.Position = UDim2.new(0, 8, 0, 78)
     sc.BackgroundTransparency = 1
-    sc.CanvasSize = UDim2.new(0, 0, 0, 450)
+    sc.CanvasSize = UDim2.new(0, 0, 0, 500)
     sc.ScrollBarThickness = 4
     sc.Visible = false
     sc.Parent = MainFrame
@@ -110,9 +153,7 @@ local function createTabButton(name, targetContainer)
     btn.Text = name
     btn.Parent = TabBar
     
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 5)
-    c.Parent = btn
+    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 5) c.Parent = btn
     
     btn.MouseButton1Click:Connect(function()
         for _, cont in pairs(Containers) do cont.Visible = false end
@@ -120,7 +161,6 @@ local function createTabButton(name, targetContainer)
     end)
 end
 
--- Tworzenie zakładek
 local cMurder = createContainer("Murder")
 local cSheriff = createContainer("Sheriff")
 local cPlayer = createContainer("Player")
@@ -131,47 +171,43 @@ createTabButton("Sheriff", cSheriff)
 createTabButton("Player", cPlayer)
 createTabButton("ESP", cEsp)
 
-cMurder.Visible = true -- Domyślna zakładka
+cMurder.Visible = true
 
--- Funkcja do przełączników (zielony = wł, czerwony = wył)
+-- Funkcja przycisku ze zmianą koloru (Zielony = Wł, Czerwony = Wył)
 local function addToggle(parent, name, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 38)
-    btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Czerwony (domyślnie wył)
+    btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
     btn.Font = Enum.Font.SourceSansSemibold
     btn.Text = name .. ": WYŁĄCZONY"
     btn.Parent = parent
     
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 6)
-    c.Parent = btn
+    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = btn
     
     local state = false
     btn.MouseButton1Click:Connect(function()
         state = not state
         callback(state)
         if state then
-            btn.BackgroundColor3 = Color3.fromRGB(40, 180, 80) -- Zielony
+            btn.BackgroundColor3 = Color3.fromRGB(40, 180, 80)
             btn.Text = name .. ": WŁĄCZONY"
         else
-            btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Czerwony
+            btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
             btn.Text = name .. ": WYŁĄCZONY"
         end
     end)
 end
 
--- Funkcja do suwaków (suwaki z przesuwanym paskiem)
+-- Funkcja suwaka
 local function addSlider(parent, name, min, max, current, callback)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 55)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.Parent = parent
     
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 6)
-    c.Parent = frame
+    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -10, 0, 25)
@@ -191,9 +227,7 @@ local function addSlider(parent, name, min, max, current, callback)
     sliderBg.Text = ""
     sliderBg.Parent = frame
     
-    local sc = Instance.new("UICorner")
-    sc.CornerRadius = UDim.new(0, 4)
-    sc.Parent = sliderBg
+    local sc = Instance.new("UICorner") sc.CornerRadius = UDim.new(0, 4) sc.Parent = sliderBg
     
     local sliderFill = Instance.new("Frame")
     sliderFill.Size = UDim2.new((current - min)/(max - min), 0, 1, 0)
@@ -201,9 +235,7 @@ local function addSlider(parent, name, min, max, current, callback)
     sliderFill.BorderSizePixel = 0
     sliderFill.Parent = sliderBg
     
-    local sfc = Instance.new("UICorner")
-    sfc.CornerRadius = UDim.new(0, 4)
-    sfc.Parent = sliderFill
+    local sfc = Instance.new("UICorner") sfc.CornerRadius = UDim.new(0, 4) sfc.Parent = sliderFill
     
     local dragging = false
     sliderBg.InputBegan:Connect(function(input)
@@ -211,13 +243,11 @@ local function addSlider(parent, name, min, max, current, callback)
             dragging = true
         end
     end)
-    
     UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
-    
     UserInputService.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
             local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
@@ -230,16 +260,40 @@ local function addSlider(parent, name, min, max, current, callback)
 end
 
 -------------------------------------------------
--- ZAWARTOŚĆ ZAKŁADWORKA: MURDER
+-- ZAKŁADKA: MURDER
 -------------------------------------------------
 addToggle(cMurder, "Kill Aura", function(v) _G.KillAuraOn = v end)
 addSlider(cMurder, "Zasięg Kill Aury", 10, 100, 10, function(v) _G.KillAuraRangeVal = v end)
 
+-- Przycisk KILL ALL (Zabij wszystkich naraz)
+local btnKillAll = Instance.new("TextButton")
+btnKillAll.Size = UDim2.new(1, 0, 0, 40)
+btnKillAll.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+btnKillAll.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnKillAll.TextSize = 14
+btnKillAll.Font = Enum.Font.SourceSansBold
+btnKillAll.Text = "🔥 KILL ALL (Zabij wszystkich)"
+btnKillAll.Parent = cMurder
+local kac = Instance.new("UICorner") kac.CornerRadius = UDim.new(0, 6) kac.Parent = btnKillAll
+
+btnKillAll.MouseButton1Click:Connect(function()
+    local knife = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife"))
+    if knife then
+        knife.Parent = LocalPlayer.Character
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
+                pcall(function() knife:Activate() end)
+            end
+        end
+    end
+end)
+
 -------------------------------------------------
--- ZAWARTOŚĆ ZAKŁADKI: SHERIFF
+-- ZAKŁADKA: SHERIFF
 -------------------------------------------------
 local btnGun = Instance.new("TextButton")
-btnGun.Size = UDim2.new(1, 0, 0, 38)
+btnGun.Size = UDim2.new(1, 0, 0, 40)
 btnGun.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 btnGun.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnGun.TextSize = 13
@@ -258,7 +312,7 @@ btnGun.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------
--- ZAWARTOŚĆ ZAKŁADKI: PLAYER
+-- ZAKŁADKA: PLAYER
 -------------------------------------------------
 addSlider(cPlayer, "Prędkość (WalkSpeed)", 1, 1000, 16, function(v)
     _G.SpeedVal = v
@@ -282,12 +336,15 @@ addToggle(cPlayer, "Infinite Jump", function(v) _G.InfJumpOn = v end)
 addToggle(cPlayer, "Fly (Latanie)", function(v) _G.FlyOn = v end)
 
 -------------------------------------------------
--- ZAWARTOŚĆ ZAKŁADKI: ESP
+-- ZAKŁADKA: ESP (Role, Names, Coins, Traps)
 -------------------------------------------------
-addToggle(cEsp, "ESP Ról (Murder/Sheriff/Innocent)", function(v) _G.EspRolesOn = v end)
+addToggle(cEsp, "ESP Ról (Kolory postaci)", function(v) _G.EspRolesOn = v end)
+addToggle(cEsp, "ESP Nazw i Ról nad głowami", function(v) _G.EspNamesOn = v end)
+addToggle(cEsp, "ESP Coinów (Monety)", function(v) _G.EspCoinsOn = v end)
+addToggle(cEsp, "ESP Trapów (Pułapki)", function(v) _G.EspTrapsOn = v end)
 
 -------------------------------------------------
--- PĘTLE W TLE
+-- PĘTLE DZIAŁAJĄCE W TLE
 -------------------------------------------------
 RunService.Stepped:Connect(function()
     if _G.NoclipOn and LocalPlayer.Character then
@@ -311,17 +368,24 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    if _G.EspRolesOn then
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                local char = p.Character
-                local col = Color3.fromRGB(0, 255, 0) -- Zielony (Innocent)
-                local bp = p:FindFirstChild("Backpack")
-                if (bp and bp:FindFirstChild("Knife")) or char:FindFirstChild("Knife") then
-                    col = Color3.fromRGB(255, 0, 0) -- Czerwony (Murder)
-                elseif (bp and bp:FindFirstChild("Gun")) or char:FindFirstChild("Gun") then
-                    col = Color3.fromRGB(0, 120, 255) -- Niebieski (Sheriff)
-                end
+    -- ESP Ról (Highlight) & Nazwy nad głowami
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local char = p.Character
+            local col = Color3.fromRGB(0, 255, 0) -- Zielony (Innocent)
+            local roleStr = "Innocent"
+            
+            local bp = p:FindFirstChild("Backpack")
+            if (bp and bp:FindFirstChild("Knife")) or char:FindFirstChild("Knife") then
+                col = Color3.fromRGB(255, 0, 0) -- Czerwony (Murder)
+                roleStr = "Murderer"
+            elseif (bp and bp:FindFirstChild("Gun")) or char:FindFirstChild("Gun") then
+                col = Color3.fromRGB(0, 120, 255) -- Niebieski (Sheriff)
+                roleStr = "Sheriff"
+            end
+            
+            -- Highlight Postaci
+            if _G.EspRolesOn then
                 local hl = char:FindFirstChild("JasiuESP")
                 if not hl then
                     hl = Instance.new("Highlight")
@@ -330,11 +394,79 @@ RunService.Stepped:Connect(function()
                     hl.OutlineColor = Color3.fromRGB(255, 255, 255)
                 end
                 hl.FillColor = col
+            else
+                if char:FindFirstChild("JasiuESP") then char.JasiuESP:Destroy() end
+            end
+            
+            -- ESP Nazw / Ról nad głową
+            if _G.EspNamesOn then
+                local head = char:FindFirstChild("Head")
+                if head then
+                    local bg = head:FindFirstChild("JasiuNameTag")
+                    if not bg then
+                        bg = Instance.new("BillboardGui")
+                        bg.Name = "JasiuNameTag"
+                        bg.Size = UDim2.new(0, 100, 0, 40)
+                        bg.StudsOffset = Vector3.new(0, 2.5, 0)
+                        bg.AlwaysOnTop = true
+                        bg.Parent = head
+                        
+                        local txt = Instance.new("TextLabel")
+                        txt.Name = "TagText"
+                        txt.Size = UDim2.new(1, 0, 1, 0)
+                        txt.BackgroundTransparency = 1
+                        txt.TextSize = 13
+                        txt.Font = Enum.Font.SourceSansBold
+                        txt.Parent = bg
+                    end
+                    local t = bg:FindFirstChild("TagText")
+                    if t then
+                        t.Text = p.Name .. "\n[" .. roleStr .. "]"
+                        t.TextColor3 = col
+                    end
+                end
+            else
+                local head = char:FindFirstChild("Head")
+                if head and head:FindFirstChild("JasiuNameTag") then
+                    head.JasiuNameTag:Destroy()
+                end
+            end
+        end
+    end
+    
+    -- ESP Coinów
+    if _G.EspCoinsOn then
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "CoinContainer" or v.Name == "Coin" then
+                if not v:FindFirstChild("CoinHighlight") then
+                    local ch = Instance.new("Highlight")
+                    ch.Name = "CoinHighlight"
+                    ch.FillColor = Color3.fromRGB(255, 215, 0)
+                    ch.Parent = v
+                end
             end
         end
     else
-        for _, p in pairs(Players:GetPlayers()) do
-            if p.Character and p.Character:FindFirstChild("JasiuESP") then p.Character.JasiuESP:Destroy() end
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "CoinHighlight" then v:Destroy() end
+        end
+    end
+    
+    -- ESP Trapów
+    if _G.EspTrapsOn then
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "Trap" or v.Name.lower:find("trap") then
+                if not v:FindFirstChild("TrapHighlight") then
+                    local th = Instance.new("Highlight")
+                    th.Name = "TrapHighlight"
+                    th.FillColor = Color3.fromRGB(255, 128, 0)
+                    th.Parent = v
+                end
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "TrapHighlight" then v:Destroy() end
         end
     end
 end)
