@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Player Invisibility + Nowa Zakładka Troll: Zombie)
+-- Jasiu Hub V2.1 | Murder Mystery 2 (Stabilne i Powiększone Menu)
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -30,7 +30,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JasiuHubV2"
 ScreenGui.Parent = CoreGui
 
--- Główne okno (440x490)
+-- Główne okno (Powiększone: 440x490)
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 440, 0, 490)
 MainFrame.Position = UDim2.new(0.5, -220, 0.5, -245)
@@ -122,7 +122,7 @@ OpenIcon.MouseButton1Click:Connect(function()
     OpenIcon.Visible = false
 end)
 
--- Pasek zakładek (5 zakładek: Murder, Sheriff, Player, ESP, Troll)
+-- Pasek zakładek
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -16, 0, 32)
 TabBar.Position = UDim2.new(0, 8, 0, 45)
@@ -132,7 +132,7 @@ TabBar.Parent = MainFrame
 local TabList = Instance.new("UIListLayout")
 TabList.FillDirection = Enum.FillDirection.Horizontal
 TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-TabList.Padding = UDim.new(0, 4)
+TabList.Padding = UDim.new(0, 6)
 TabList.Parent = TabBar
 
 local Containers = {}
@@ -157,10 +157,10 @@ end
 
 local function createTabButton(name, targetContainer)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 75, 1, 0) -- Dopasowane dla 5 zakładek
+    btn.Size = UDim2.new(0, 95, 1, 0)
     btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
+    btn.TextSize = 13
     btn.Font = Enum.Font.SourceSansBold
     btn.Text = name
     btn.Parent = TabBar
@@ -177,17 +177,14 @@ local cMurder = createContainer("Murder")
 local cSheriff = createContainer("Sheriff")
 local cPlayer = createContainer("Player")
 local cEsp = createContainer("ESP")
-local cTroll = createContainer("Troll")
 
 createTabButton("Murder", cMurder)
 createTabButton("Sheriff", cSheriff)
 createTabButton("Player", cPlayer)
 createTabButton("ESP", cEsp)
-createTabButton("Troll", cTroll)
 
 cMurder.Visible = true
 
--- Funkcja przełącznika (Toggle)
 local function addToggle(parent, name, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 42)
@@ -214,7 +211,6 @@ local function addToggle(parent, name, callback)
     end)
 end
 
--- Funkcja suwaka
 local function addSlider(parent, name, min, max, current, callback)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 55)
@@ -327,7 +323,7 @@ end)
 addToggle(cSheriff, "Auto Podnoszenie Broni", function(v) _G.AutoGrabGunOn = v end)
 
 -------------------------------------------------
--- ZAKŁADKA: PLAYER (Dodana Niewidzialność)
+-- ZAKŁADKA: PLAYER (Z Niewidzialnością)
 -------------------------------------------------
 addSlider(cPlayer, "Prędkość (WalkSpeed)", 1, 1000, 16, function(v)
     _G.SpeedVal = v
@@ -372,73 +368,15 @@ addToggle(cEsp, "ESP Coinów (Monety)", function(v) _G.EspCoinsOn = v end)
 addToggle(cEsp, "ESP Trapów (Pułapki)", function(v) _G.EspTrapsOn = v end)
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Get Zombie + Zamiana w Zombie)
--------------------------------------------------
-local btnGetZombie = Instance.new("TextButton")
-btnGetZombie.Size = UDim2.new(1, 0, 0, 42)
-btnGetZombie.BackgroundColor3 = Color3.fromRGB(140, 0, 180)
-btnGetZombie.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnGetZombie.TextSize = 13
-btnGetZombie.Font = Enum.Font.SourceSansBold
-btnGetZombie.Text = "🧟 Get Zombie (Pobierz miksturę/narzędzie)"
-btnGetZombie.Parent = cTroll
-local gzc = Instance.new("UICorner") gzc.CornerRadius = UDim.new(0, 6) gzc.Parent = btnGetZombie
-
-btnGetZombie.MouseButton1Click:Connect(function()
-    pcall(function()
-        -- Próba przywołania narzędzia zombie z replikowanych zasobów gry jeśli istnieją
-        local replicatedStorage = game:GetService("ReplicatedStorage")
-        for _, item in pairs(replicatedStorage:GetDescendants()) do
-            if item.Name:lower():find("zombie") then
-                local clone = item:Clone()
-                clone.Parent = LocalPlayer.Backpack
-                break
-            end
-        end
-    end)
-end)
-
-local btnTurnZombie = Instance.new("TextButton")
-btnTurnZombie.Size = UDim2.new(1, 0, 0, 42)
-btnTurnZombie.BackgroundColor3 = Color3.fromRGB(80, 120, 40)
-btnTurnZombie.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnTurnZombie.TextSize = 13
-btnTurnZombie.Font = Enum.Font.SourceSansBold
-btnTurnZombie.Text = "🧟 Zamień się w Zombie (Animacja/Styl)"
-btnTurnZombie.Parent = cTroll
-local tzc = Instance.new("UICorner") tzc.CornerRadius = UDim.new(0, 6) tzc.Parent = btnTurnZombie
-
-btnTurnZombie.MouseButton1Click:Connect(function()
-    pcall(function()
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("Humanoid") then
-            -- Zmiana stylu ramion/postaci na zombie (pochylenie / animacja zaszłości)
-            for _, part in pairs(char:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.BrickColor = BrickColor.new("Dark green")
-                end
-            end
-            local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://616158929" -- Przykładowe ID animacji zombie
-            local hum = char.Humanoid
-            local track = hum:LoadAnimation(anim)
-            track:Play()
-        end
-    end)
-end)
-
--------------------------------------------------
 -- PĘTLE W TLE
 -------------------------------------------------
 RunService.Stepped:Connect(function()
-    -- Noclip
     if _G.NoclipOn and LocalPlayer.Character then
         for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
             if v:IsA("BasePart") then v.CanCollide = false end
         end
     end
     
-    -- Auto Podnoszenie Broni
     if _G.AutoGrabGunOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         for _, v in pairs(Workspace:GetChildren()) do
             if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
@@ -447,7 +385,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Niewidzialność w tle
     if _G.InvisibilityOn and LocalPlayer.Character then
         for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
@@ -458,7 +395,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Kill Aura
     if _G.KillAuraOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local myRoot = LocalPlayer.Character.HumanoidRootPart
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
@@ -474,7 +410,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- ESP Ról & Nazwy
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local char = p.Character
@@ -520,4 +455,73 @@ RunService.Stepped:Connect(function()
                         txt.Size = UDim2.new(1, 0, 1, 0)
                         txt.BackgroundTransparency = 1
                         txt.TextSize = 13
-                        
+                        txt.Font = Enum.Font.SourceSansBold
+                        txt.Parent = bg
+                    end
+                    local t = bg:FindFirstChild("TagText")
+                    if t then
+                        t.Text = p.Name .. "\n[" .. roleStr .. "]"
+                        t.TextColor3 = col
+                    end
+                end
+            else
+                local head = char:FindFirstChild("Head")
+                if head and head:FindFirstChild("JasiuNameTag") then
+                    head.JasiuNameTag:Destroy()
+                end
+            end
+        end
+    end
+    
+    if _G.EspCoinsOn then
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "CoinContainer" or v.Name == "Coin" then
+                if not v:FindFirstChild("CoinHighlight") then
+                    local ch = Instance.new("Highlight")
+                    ch.Name = "CoinHighlight"
+                    ch.FillColor = Color3.fromRGB(255, 215, 0)
+                    ch.Parent = v
+                end
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "CoinHighlight" then v:Destroy() end
+        end
+    end
+    
+    if _G.EspTrapsOn then
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "Trap" or v.Name:lower():find("trap") then
+                if not v:FindFirstChild("TrapHighlight") then
+                    local th = Instance.new("Highlight")
+                    th.Name = "TrapHighlight"
+                    th.FillColor = Color3.fromRGB(255, 128, 0)
+                    th.Parent = v
+                end
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "TrapHighlight" then v:Destroy() end
+        end
+    end
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if _G.InfJumpOn then
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+local camera = Workspace.CurrentCamera
+RunService.RenderStepped:Connect(function()
+    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        local rootPart = LocalPlayer.Character.HumanoidRootPart
+        local humanoid = LocalPlayer.Character.Humanoid
+        humanoid.PlatformStand = true
+        local moveDirection = humanoid.MoveDirection
+        local velocity = Vector3.new(0, 0, 0)
+        if moveDirection.Magnitude > 0 then
+            velocity = camera.CFrame.LookVector * (
