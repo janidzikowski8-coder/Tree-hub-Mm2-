@@ -1,24 +1,31 @@
--- Jasiu Hub V2.2 | Murder Mystery 2 (Fix PlayerGui & Mobile Compatibility)
+-- Jasiu Hub V2.2 | Murder Mystery 2 (Ultra Mobile Compatibility Fix)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
 
--- Bezpieczne pobieranie kontenera na interfejs (PlayerGui z fallbackiem na CoreGui)
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+
+-- Wybór bezpiecznego kontenera na GUI
 local ParentGui
 pcall(function()
-    ParentGui = LocalPlayer:WaitForChild("PlayerGui")
+    ParentGui = LocalPlayer:WaitForChild("PlayerGui", 5)
 end)
 if not ParentGui then
-    ParentGui = game:GetService("CoreGui")
+    pcall(function()
+        ParentGui = game:GetService("CoreGui")
+    end)
 end
 
-if ParentGui:FindFirstChild("JasiuHubV1") then
-    ParentGui.JasiuHubV1:Destroy()
+-- Usunięcie starej wersji GUI, jeśli istnieje
+if ParentGui then
+    local oldGui = ParentGui:FindFirstChild("JasiuHubV1")
+    if oldGui then
+        oldGui:Destroy()
+    end
 end
 
--- Zmienne
+-- Zmienne globalne
 _G.SpeedVal = 16
 _G.JumpVal = 50
 _G.NoclipOn = false
@@ -38,7 +45,10 @@ _G.Fake3FXOn = false
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JasiuHubV1"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = ParentGui
+
+pcall(function()
+    ScreenGui.Parent = ParentGui
+end)
 
 -- Główne okno (Powiększone: 400x450)
 local MainFrame = Instance.new("Frame")
@@ -438,7 +448,7 @@ addToggle(cAdmin, "Fake 3FX (Efekty Specjalne)", function(v)
     local char = LocalPlayer.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
         local fx = char.HumanoidRootPart:FindFirstChild("Fake3FXParticles")
-        if v and not fx then
+        if v and not fx me
             local att = Instance.new("Attachment")
             att.Name = "Fake3FXParticles"
             att.Parent = char.HumanoidRootPart
@@ -524,7 +534,4 @@ RunService.Stepped:Connect(function()
                         local txt = Instance.new("TextLabel")
                         txt.Name = "TagText"
                         txt.Size = UDim2.new(1, 0, 1, 0)
-                        txt.BackgroundTransparency = 1
-                        txt.TextSize = 13
-                        txt.Font = Enum.Font.SourceSansBold
-                      
+                        txt.Backgrou
