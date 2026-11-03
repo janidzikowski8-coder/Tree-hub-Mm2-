@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Powiększone Menu z Ozdobami)
+-- Jasiu Hub V2 | Murder Mystery 2 (Powiększone Menu + Auto Podnoszenie Broni)
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -23,15 +23,16 @@ _G.EspRolesOn = false
 _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
+_G.AutoGrabGunOn = false
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JasiuHubV2"
 ScreenGui.Parent = CoreGui
 
--- Główne okno (Powiększone do 400x450)
+-- Główne okno (Powiększone do 440x490)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 400, 0, 450)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -225)
+MainFrame.Size = UDim2.new(0, 440, 0, 490)
+MainFrame.Position = UDim2.new(0.5, -220, 0.5, -245)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -47,7 +48,7 @@ UIStroke.Color = Color3.fromRGB(0, 180, 80)
 UIStroke.Thickness = 1.5
 UIStroke.Parent = MainFrame
 
--- Pasek tytułowy z ozdobami
+-- Pasek tytułowy
 local TitleBar = Instance.new("Frame")
 TitleBar.Size = UDim2.new(1, 0, 0, 38)
 TitleBar.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
@@ -63,10 +64,10 @@ TitleText.Size = UDim2.new(1, -70, 1, 0)
 TitleText.Position = UDim2.new(0, 12, 0, 0)
 TitleText.BackgroundTransparency = 1
 TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleText.TextSize = 14
+TitleText.TextSize = 15
 TitleText.Font = Enum.Font.SourceSansBold
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
-TitleText.Text = "Jasiu Hub V2 🎃👻 | MM2 Pro 🥀"
+TitleText.Text = "Jasiu Hub V2 | MM2 Pro"
 TitleText.Parent = TitleBar
 
 -- Przycisk zwijania (-)
@@ -101,7 +102,7 @@ OpenIcon.Size = UDim2.new(0, 45, 0, 45)
 OpenIcon.Position = UDim2.new(0, 20, 0.2, 0)
 OpenIcon.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
 OpenIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenIcon.Text = "🎃 J"
+OpenIcon.Text = "J"
 OpenIcon.TextSize = 14
 OpenIcon.Font = Enum.Font.SourceSansBold
 OpenIcon.Visible = false
@@ -120,7 +121,7 @@ OpenIcon.MouseButton1Click:Connect(function()
     OpenIcon.Visible = false
 end)
 
--- Pasek zakładek dopasowany do szerokości 400px
+-- Pasek zakładek dopasowany do szerszego okna
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -16, 0, 32)
 TabBar.Position = UDim2.new(0, 8, 0, 45)
@@ -155,7 +156,7 @@ end
 
 local function createTabButton(name, targetContainer)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 88, 1, 0) -- Szersze przyciski zakładek
+    btn.Size = UDim2.new(0, 95, 1, 0) -- Jeszcze szersze przyciski zakładek
     btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
@@ -186,7 +187,7 @@ cMurder.Visible = true
 -- Funkcja przycisku ze zmianą koloru (Zielony = Wł, Czerwony = Wył)
 local function addToggle(parent, name, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.Size = UDim2.new(1, 0, 0, 42)
     btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
@@ -276,12 +277,12 @@ addToggle(cMurder, "Kill Aura", function(v) _G.KillAuraOn = v end)
 addSlider(cMurder, "Zasięg Kill Aury", 10, 100, 10, function(v) _G.KillAuraRangeVal = v end)
 
 local btnKillAll = Instance.new("TextButton")
-btnKillAll.Size = UDim2.new(1, 0, 0, 40)
+btnKillAll.Size = UDim2.new(1, 0, 0, 42)
 btnKillAll.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 btnKillAll.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnKillAll.TextSize = 14
 btnKillAll.Font = Enum.Font.SourceSansBold
-btnKillAll.Text = "🔥 KILL ALL (Zabij wszystkich) 🥀"
+btnKillAll.Text = "🔥 KILL ALL (Zabij wszystkich)"
 btnKillAll.Parent = cMurder
 local kac = Instance.new("UICorner") kac.CornerRadius = UDim.new(0, 6) kac.Parent = btnKillAll
 
@@ -301,13 +302,14 @@ end)
 -------------------------------------------------
 -- ZAKŁADKA: SHERIFF
 -------------------------------------------------
+-- Manualny przycisk teleportu do broni
 local btnGun = Instance.new("TextButton")
-btnGun.Size = UDim2.new(1, 0, 0, 40)
+btnGun.Size = UDim2.new(1, 0, 0, 42)
 btnGun.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 btnGun.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnGun.TextSize = 13
 btnGun.Font = Enum.Font.SourceSansBold
-btnGun.Text = "Auto Teleport do upuszczonej broni 🎃"
+btnGun.Text = "Teleport do upuszczonej broni"
 btnGun.Parent = cSheriff
 local gc = Instance.new("UICorner") gc.CornerRadius = UDim.new(0, 6) gc.Parent = btnGun
 btnGun.MouseButton1Click:Connect(function()
@@ -319,6 +321,9 @@ btnGun.MouseButton1Click:Connect(function()
         end
     end
 end)
+
+-- NOWOŚĆ: Auto Podnoszenie / Teleport do broni (Toggle)
+addToggle(cSheriff, "Auto Podnoszenie Broni", function(v) _G.AutoGrabGunOn = v end)
 
 -------------------------------------------------
 -- ZAKŁADKA: PLAYER
@@ -340,7 +345,7 @@ end)
 
 addSlider(cPlayer, "Prędkość Fly", 1, 1000, 50, function(v) _G.FlySpeedVal = v end)
 
-addToggle(cPlayer, "Noclip 👻", function(v) _G.NoclipOn = v end)
+addToggle(cPlayer, "Noclip", function(v) _G.NoclipOn = v end)
 addToggle(cPlayer, "Infinite Jump", function(v) _G.InfJumpOn = v end)
 addToggle(cPlayer, "Fly (Latanie)", function(v) _G.FlyOn = v end)
 
@@ -349,19 +354,30 @@ addToggle(cPlayer, "Fly (Latanie)", function(v) _G.FlyOn = v end)
 -------------------------------------------------
 addToggle(cEsp, "ESP Ról (Kolory postaci)", function(v) _G.EspRolesOn = v end)
 addToggle(cEsp, "ESP Nazw i Ról nad głowami", function(v) _G.EspNamesOn = v end)
-addToggle(cEsp, "ESP Coinów (Monety) 🎃", function(v) _G.EspCoinsOn = v end)
+addToggle(cEsp, "ESP Coinów (Monety)", function(v) _G.EspCoinsOn = v end)
 addToggle(cEsp, "ESP Trapów (Pułapki)", function(v) _G.EspTrapsOn = v end)
 
 -------------------------------------------------
 -- PĘTLE W TLE
 -------------------------------------------------
 RunService.Stepped:Connect(function()
+    -- Noclip
     if _G.NoclipOn and LocalPlayer.Character then
         for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
             if v:IsA("BasePart") then v.CanCollide = false end
         end
     end
     
+    -- Auto Podnoszenie Broni (Teleportuje Cię do niej, gdy się pojawi)
+    if _G.AutoGrabGunOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        for _, v in pairs(Workspace:GetChildren()) do
+            if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+            end
+        end
+    end
+    
+    -- Kill Aura
     if _G.KillAuraOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local myRoot = LocalPlayer.Character.HumanoidRootPart
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
@@ -377,6 +393,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- ESP Ról & Nazwy
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local char = p.Character
@@ -440,6 +457,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- ESP Coinów
     if _G.EspCoinsOn then
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "CoinContainer" or v.Name == "Coin" then
@@ -457,6 +475,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- ESP Trapów
     if _G.EspTrapsOn then
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "Trap" or v.Name:lower():find("trap") then
@@ -498,4 +517,3 @@ RunService.RenderStepped:Connect(function()
         LocalPlayer.Character.Humanoid.PlatformStand = false
     end
 end)
-    
