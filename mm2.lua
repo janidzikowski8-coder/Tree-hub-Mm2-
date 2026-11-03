@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Zmotywowana Wersja z Admin Panelem)
+-- Jasiu Hub V2.2 | Murder Mystery 2 (Powiększone Okno Pro)
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -31,10 +31,10 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JasiuHubV1"
 ScreenGui.Parent = CoreGui
 
--- Główne okno
+-- Główne okno (Powiększone: 400x450)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 350, 0, 420)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -210)
+MainFrame.Size = UDim2.new(0, 400, 0, 450)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -225)
 MainFrame.BackgroundColor3 = Color3.fromRGB(18, 22, 19)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -76,7 +76,7 @@ TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleText.TextSize = 15
 TitleText.Font = Enum.Font.SourceSansBold
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
-TitleText.Text = "Jasiu Hub V2 🌲 | Admin Panel"
+TitleText.Text = "Jasiu Hub V2 🌲 | Admin Panel Pro"
 TitleText.Parent = TitleBar
 
 -- Przycisk zwijania (-)
@@ -131,25 +131,24 @@ OpenIcon.MouseButton1Click:Connect(function()
     OpenIcon.Visible = false
 end)
 
--- Pasek zakładek (Murder, Sheriff, Player, ESP, Admin)
-local TabBar = Instance.new("ScrollingFrame")
-TabBar.Size = UDim2.new(1, -12, 0, 32)
-TabBar.Position = UDim2.new(0, 6, 0, 45)
+-- Pasek zakładek (Dopasowany do szerszego okna)
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(1, -16, 0, 32)
+TabBar.Position = UDim2.new(0, 8, 0, 48)
 TabBar.BackgroundTransparency = 1
-TabBar.CanvasSize = UDim2.new(0, 380, 0, 0)
-TabBar.ScrollBarThickness = 0
 TabBar.Parent = MainFrame
 
 local TabList = Instance.new("UIListLayout")
 TabList.FillDirection = Enum.FillDirection.Horizontal
-TabList.Padding = UDim.new(0, 5)
+TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TabList.Padding = UDim.new(0, 6)
 TabList.Parent = TabBar
 
 local Containers = {}
 local function createContainer(name)
     local sc = Instance.new("ScrollingFrame")
-    sc.Size = UDim2.new(1, -16, 1, -90)
-    sc.Position = UDim2.new(0, 8, 0, 84)
+    sc.Size = UDim2.new(1, -16, 1, -95)
+    sc.Position = UDim2.new(0, 8, 0, 88)
     sc.BackgroundTransparency = 1
     sc.CanvasSize = UDim2.new(0, 0, 0, 520)
     sc.ScrollBarThickness = 3
@@ -168,7 +167,7 @@ end
 
 local function createTabButton(name, targetContainer)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 68, 1, 0)
+    btn.Size = UDim2.new(0, 72, 1, 0) -- Szersze przyciski zakładek
     btn.BackgroundColor3 = Color3.fromRGB(28, 36, 30)
     btn.TextColor3 = Color3.fromRGB(200, 200, 200)
     btn.TextSize = 12
@@ -216,7 +215,7 @@ end
 -- Uniwersalny Toggle
 local function addToggle(parent, name, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 38)
+    btn.Size = UDim2.new(1, 0, 0, 40)
     btn.BackgroundColor3 = Color3.fromRGB(160, 40, 40)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
@@ -243,7 +242,7 @@ end
 -- Suwak wartości
 local function addSlider(parent, name, min, max, current, callback)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 52)
+    frame.Size = UDim2.new(1, 0, 0, 54)
     frame.BackgroundColor3 = Color3.fromRGB(25, 32, 27)
     frame.Parent = parent
     
@@ -251,7 +250,7 @@ local function addSlider(parent, name, min, max, current, callback)
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -10, 0, 22)
-    label.Position = UDim2.new(0, 6, 0, 3)
+    label.Position = UDim2.new(0, 8, 0, 4)
     label.BackgroundTransparency = 1
     label.TextColor3 = Color3.fromRGB(230, 230, 230)
     label.TextSize = 13
@@ -262,7 +261,7 @@ local function addSlider(parent, name, min, max, current, callback)
     
     local sliderBg = Instance.new("TextButton")
     sliderBg.Size = UDim2.new(1, -16, 0, 14)
-    sliderBg.Position = UDim2.new(0, 8, 0, 30)
+    sliderBg.Position = UDim2.new(0, 8, 0, 32)
     sliderBg.BackgroundColor3 = Color3.fromRGB(40, 50, 43)
     sliderBg.Text = ""
     sliderBg.Parent = frame
@@ -306,7 +305,7 @@ addToggle(cMurder, "Kill Aura", function(v) _G.KillAuraOn = v end)
 addSlider(cMurder, "Zasięg Kill Aury", 10, 100, 10, function(v) _G.KillAuraRangeVal = v end)
 
 local btnKillAll = Instance.new("TextButton")
-btnKillAll.Size = UDim2.new(1, 0, 0, 38)
+btnKillAll.Size = UDim2.new(1, 0, 0, 40)
 btnKillAll.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 btnKillAll.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnKillAll.TextSize = 13
@@ -332,7 +331,7 @@ end)
 -- ZAKŁADKA: SHERIFF
 -------------------------------------------------
 local btnGun = Instance.new("TextButton")
-btnGun.Size = UDim2.new(1, 0, 0, 38)
+btnGun.Size = UDim2.new(1, 0, 0, 40)
 btnGun.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 btnGun.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnGun.TextSize = 13
@@ -383,7 +382,7 @@ addToggle(cEsp, "ESP Coinów (Monety)", function(v) _G.EspCoinsOn = v end)
 addToggle(cEsp, "ESP Trapów (Pułapki)", function(v) _G.EspTrapsOn = v end)
 
 -------------------------------------------------
--- ZAKŁADKA: ADMIN PANEL (Nowość V2)
+-- ZAKŁADKA: ADMIN PANEL
 -------------------------------------------------
 addToggle(cAdmin, "Niewidzialność (Invisibility)", function(v)
     _G.InvisibilityOn = v
@@ -523,5 +522,4 @@ RunService.Stepped:Connect(function()
                     end
                     local t = bg:FindFirstChild("TagText")
                     if t then
-                        t.Text = p.Name .. "\n[" .. roleStr .. "]"
-   
+                        t.Text = p.Name .. "\n[" .. roleStr .. "]
