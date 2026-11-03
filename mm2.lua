@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Stabilne Menu z Niewidzialnością i Zombie w Player)
+-- Jasiu Hub V2 | Murder Mystery 2 (Zaawansowane Menu Mobilne z Toggle, ESP Extra i Niewidzialnością)
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -6,8 +6,8 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("JasiuHubV1") then
-    CoreGui.JasiuHubV1:Destroy()
+if CoreGui:FindFirstChild("JasiuHubV2") then
+    CoreGui.JasiuHubV2:Destroy()
 end
 
 -- Zmienne
@@ -23,18 +23,16 @@ _G.EspRolesOn = false
 _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
-_G.AutoGrabGunOn = false
 _G.InvisibilityOn = false
-_G.ZombieOn = false
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JasiuHubV1"
+ScreenGui.Name = "JasiuHubV2"
 ScreenGui.Parent = CoreGui
 
--- Główne okno (Powiększone: 420x460)
+-- Główne okno (Powiększone dla wygody mobilnej)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 420, 0, 460)
-MainFrame.Position = UDim2.new(0.5, -210, 0.5, -230)
+MainFrame.Size = UDim2.new(0, 380, 0, 450)
+MainFrame.Position = UDim2.new(0.5, -190, 0.5, -225)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -148,7 +146,7 @@ end
 
 local function createTabButton(name, targetContainer)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 92, 1, 0)
+    btn.Size = UDim2.new(0, 84, 1, 0)
     btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
@@ -252,7 +250,7 @@ local function addSlider(parent, name, min, max, current, callback)
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.MouseMovement) then
             local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
             sliderFill.Size = UDim2.new(pos, 0, 1, 0)
             local val = math.floor(min + (max - min) * pos)
@@ -268,6 +266,7 @@ end
 addToggle(cMurder, "Kill Aura", function(v) _G.KillAuraOn = v end)
 addSlider(cMurder, "Zasięg Kill Aury", 10, 100, 10, function(v) _G.KillAuraRangeVal = v end)
 
+-- Przycisk KILL ALL (Zabij wszystkich naraz)
 local btnKillAll = Instance.new("TextButton")
 btnKillAll.Size = UDim2.new(1, 0, 0, 40)
 btnKillAll.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -300,7 +299,7 @@ btnGun.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 btnGun.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnGun.TextSize = 13
 btnGun.Font = Enum.Font.SourceSansBold
-btnGun.Text = "Teleport do upuszczonej broni"
+btnGun.Text = "Auto Teleport do upuszczonej broni"
 btnGun.Parent = cSheriff
 local gc = Instance.new("UICorner") gc.CornerRadius = UDim.new(0, 6) gc.Parent = btnGun
 btnGun.MouseButton1Click:Connect(function()
@@ -313,10 +312,8 @@ btnGun.MouseButton1Click:Connect(function()
     end
 end)
 
-addToggle(cSheriff, "Auto Podnoszenie Broni", function(v) _G.AutoGrabGunOn = v end)
-
 -------------------------------------------------
--- ZAKŁADKA: PLAYER (Z Niewidzialnością i Zmianą w Zombie)
+-- ZAKŁADKA: PLAYER (Dodano Niewidzialność)
 -------------------------------------------------
 addSlider(cPlayer, "Prędkość (WalkSpeed)", 1, 1000, 16, function(v)
     _G.SpeedVal = v
@@ -339,10 +336,9 @@ addToggle(cPlayer, "Noclip", function(v) _G.NoclipOn = v end)
 addToggle(cPlayer, "Infinite Jump", function(v) _G.InfJumpOn = v end)
 addToggle(cPlayer, "Fly (Latanie)", function(v) _G.FlyOn = v end)
 addToggle(cPlayer, "Niewidzialność (Invisibility)", function(v) _G.InvisibilityOn = v end)
-addToggle(cPlayer, "Zamiana w Zombie", function(v) _G.ZombieOn = v end)
 
 -------------------------------------------------
--- ZAKŁADKA: ESP
+-- ZAKŁADKA: ESP (Role, Names, Coins, Traps)
 -------------------------------------------------
 addToggle(cEsp, "ESP Ról (Kolory postaci)", function(v) _G.EspRolesOn = v end)
 addToggle(cEsp, "ESP Nazw i Ról nad głowami", function(v) _G.EspNamesOn = v end)
@@ -359,28 +355,13 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    if _G.AutoGrabGunOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        for _, v in pairs(Workspace:GetChildren()) do
-            if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
-            end
-        end
-    end
-    
+    -- Obsługa niewidzialności w tle
     if _G.InvisibilityOn and LocalPlayer.Character then
         for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                 part.Transparency = 1
             elseif part:IsA("Decal") then
                 part.Transparency = 1
-            end
-        end
-    end
-    
-    if _G.ZombieOn and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                part.BrickColor = BrickColor.new("Dark green")
             end
         end
     end
@@ -400,21 +381,23 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- ESP Ról (Highlight) & Nazwy nad głowami
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local char = p.Character
-            local col = Color3.fromRGB(0, 255, 0)
+            local col = Color3.fromRGB(0, 255, 0) -- Zielony (Innocent)
             local roleStr = "Innocent"
             
             local bp = p:FindFirstChild("Backpack")
             if (bp and bp:FindFirstChild("Knife")) or char:FindFirstChild("Knife") then
-                col = Color3.fromRGB(255, 0, 0)
+                col = Color3.fromRGB(255, 0, 0) -- Czerwony (Murder)
                 roleStr = "Murderer"
             elseif (bp and bp:FindFirstChild("Gun")) or char:FindFirstChild("Gun") then
-                col = Color3.fromRGB(0, 120, 255)
+                col = Color3.fromRGB(0, 120, 255) -- Niebieski (Sheriff)
                 roleStr = "Sheriff"
             end
             
+            -- Highlight Postaci
             if _G.EspRolesOn then
                 local hl = char:FindFirstChild("JasiuESP")
                 if not hl then
@@ -428,6 +411,7 @@ RunService.Stepped:Connect(function()
                 if char:FindFirstChild("JasiuESP") then char.JasiuESP:Destroy() end
             end
             
+            -- ESP Nazw / Ról nad głową
             if _G.EspNamesOn then
                 local head = char:FindFirstChild("Head")
                 if head then
@@ -463,6 +447,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- ESP Coinów
     if _G.EspCoinsOn then
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "CoinContainer" or v.Name == "Coin" then
@@ -480,6 +465,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- ESP Trapów
     if _G.EspTrapsOn then
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "Trap" or v.Name:lower():find("trap") then
@@ -514,4 +500,10 @@ RunService.RenderStepped:Connect(function()
         local moveDirection = humanoid.MoveDirection
         local velocity = Vector3.new(0, 0, 0)
         if moveDirection.Magnitude > 0 then
-            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeedVal) + camera.CFr
+            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeedVal) + camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeedVal)
+        end
+        rootPart.Velocity = velocity
+    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.PlatformStand = false
+    end
+end)
