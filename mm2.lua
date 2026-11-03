@@ -1,4 +1,4 @@
--- Jasiu Hub V2.1 | Murder Mystery 2 (Stabilne i Powiększone Menu)
+-- Jasiu Hub V2 | Murder Mystery 2 (Stabilne Menu z Niewidzialnością i Zombie w Player)
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -6,8 +6,8 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("JasiuHubV2") then
-    CoreGui.JasiuHubV2:Destroy()
+if CoreGui:FindFirstChild("JasiuHubV1") then
+    CoreGui.JasiuHubV1:Destroy()
 end
 
 -- Zmienne
@@ -25,15 +25,16 @@ _G.EspTrapsOn = false
 _G.EspNamesOn = false
 _G.AutoGrabGunOn = false
 _G.InvisibilityOn = false
+_G.ZombieOn = false
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JasiuHubV2"
+ScreenGui.Name = "JasiuHubV1"
 ScreenGui.Parent = CoreGui
 
--- Główne okno (Powiększone: 440x490)
+-- Główne okno (Powiększone: 420x460)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 440, 0, 490)
-MainFrame.Position = UDim2.new(0.5, -220, 0.5, -245)
+MainFrame.Size = UDim2.new(0, 420, 0, 460)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -230)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -41,24 +42,15 @@ MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
-
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(0, 180, 80)
-UIStroke.Thickness = 1.5
-UIStroke.Parent = MainFrame
 
 -- Pasek tytułowy
 local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 38)
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
 TitleBar.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
 TitleBar.BorderSizePixel = 0
 TitleBar.Parent = MainFrame
-
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 10)
-TitleCorner.Parent = TitleBar
 
 local TitleText = Instance.new("TextLabel")
 TitleText.Size = UDim2.new(1, -70, 1, 0)
@@ -68,49 +60,48 @@ TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleText.TextSize = 15
 TitleText.Font = Enum.Font.SourceSansBold
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
-TitleText.Text = "Jasiu Hub V2 | MM2 Pro"
+TitleText.Text = "Jasiu Hub V2 🌲 | MM2 Pro"
 TitleText.Parent = TitleBar
 
--- Przycisk zwijania (-)
+-- Przycisk zwijania do małej ikony (Minimalizuj)
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Size = UDim2.new(0, 28, 0, 28)
-MinimizeBtn.Position = UDim2.new(1, -64, 0, 5)
+MinimizeBtn.Position = UDim2.new(1, -64, 0, 3)
 MinimizeBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
 MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 MinimizeBtn.Text = "-"
-MinimizeBtn.TextSize = 16
+MinimizeBtn.TextSize = 15
 MinimizeBtn.Font = Enum.Font.SourceSansBold
 MinimizeBtn.Parent = TitleBar
-local minC = Instance.new("UICorner") minC.CornerRadius = UDim.new(0, 6) minC.Parent = MinimizeBtn
+local minC = Instance.new("UICorner") minC.CornerRadius = UDim.new(0, 5) minC.Parent = MinimizeBtn
 
 -- Przycisk zamknięcia (X)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, 28, 0, 28)
-CloseBtn.Position = UDim2.new(1, -32, 0, 5)
+CloseBtn.Position = UDim2.new(1, -32, 0, 3)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.Text = "X"
 CloseBtn.TextSize = 13
-CloseBtn.Font = Enum.Font.SourceSansBold
 CloseBtn.Parent = TitleBar
-local closeC = Instance.new("UICorner") closeC.CornerRadius = UDim.new(0, 6) closeC.Parent = CloseBtn
+local closeC = Instance.new("UICorner") closeC.CornerRadius = UDim.new(0, 5) closeC.Parent = CloseBtn
 
 CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
--- Mała ikona otwierania
+-- Mała ikona do ponownego otwierania menu
 local OpenIcon = Instance.new("TextButton")
 OpenIcon.Size = UDim2.new(0, 45, 0, 45)
 OpenIcon.Position = UDim2.new(0, 20, 0.2, 0)
 OpenIcon.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
 OpenIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenIcon.Text = "J"
+OpenIcon.Text = "🌲 J"
 OpenIcon.TextSize = 14
 OpenIcon.Font = Enum.Font.SourceSansBold
 OpenIcon.Visible = false
 OpenIcon.Active = true
 OpenIcon.Draggable = true
 OpenIcon.Parent = ScreenGui
-local openC = Instance.new("UICorner") openC.CornerRadius = UDim.new(0, 10) openC.Parent = OpenIcon
+local openC = Instance.new("UICorner") openC.CornerRadius = UDim.new(0, 8) openC.Parent = OpenIcon
 
 MinimizeBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
@@ -122,26 +113,26 @@ OpenIcon.MouseButton1Click:Connect(function()
     OpenIcon.Visible = false
 end)
 
--- Pasek zakładek
+-- Pasek zakładek u góry (Murder, Sheriff, Player, ESP)
 local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(1, -16, 0, 32)
-TabBar.Position = UDim2.new(0, 8, 0, 45)
+TabBar.Size = UDim2.new(1, -10, 0, 32)
+TabBar.Position = UDim2.new(0, 5, 0, 40)
 TabBar.BackgroundTransparency = 1
 TabBar.Parent = MainFrame
 
 local TabList = Instance.new("UIListLayout")
 TabList.FillDirection = Enum.FillDirection.Horizontal
 TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-TabList.Padding = UDim.new(0, 6)
+TabList.Padding = UDim.new(0, 5)
 TabList.Parent = TabBar
 
 local Containers = {}
 local function createContainer(name)
     local sc = Instance.new("ScrollingFrame")
-    sc.Size = UDim2.new(1, -16, 1, -90)
-    sc.Position = UDim2.new(0, 8, 0, 85)
+    sc.Size = UDim2.new(1, -16, 1, -85)
+    sc.Position = UDim2.new(0, 8, 0, 78)
     sc.BackgroundTransparency = 1
-    sc.CanvasSize = UDim2.new(0, 0, 0, 520)
+    sc.CanvasSize = UDim2.new(0, 0, 0, 550)
     sc.ScrollBarThickness = 4
     sc.Visible = false
     sc.Parent = MainFrame
@@ -157,15 +148,15 @@ end
 
 local function createTabButton(name, targetContainer)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 95, 1, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    btn.Size = UDim2.new(0, 92, 1, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
     btn.Font = Enum.Font.SourceSansBold
     btn.Text = name
     btn.Parent = TabBar
     
-    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = btn
+    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 5) c.Parent = btn
     
     btn.MouseButton1Click:Connect(function()
         for _, cont in pairs(Containers) do cont.Visible = false end
@@ -185,9 +176,10 @@ createTabButton("ESP", cEsp)
 
 cMurder.Visible = true
 
+-- Funkcja przycisku ze zmianą koloru (Zielony = Wł, Czerwony = Wył)
 local function addToggle(parent, name, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 42)
+    btn.Size = UDim2.new(1, 0, 0, 38)
     btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
@@ -211,17 +203,18 @@ local function addToggle(parent, name, callback)
     end)
 end
 
+-- Funkcja suwaka
 local function addSlider(parent, name, min, max, current, callback)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 55)
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.Parent = parent
     
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -10, 0, 25)
-    label.Position = UDim2.new(0, 6, 0, 2)
+    label.Position = UDim2.new(0, 5, 0, 2)
     label.BackgroundTransparency = 1
     label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.TextSize = 13
@@ -231,9 +224,9 @@ local function addSlider(parent, name, min, max, current, callback)
     label.Parent = frame
     
     local sliderBg = Instance.new("TextButton")
-    sliderBg.Size = UDim2.new(1, -16, 0, 15)
-    sliderBg.Position = UDim2.new(0, 8, 0, 30)
-    sliderBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    sliderBg.Size = UDim2.new(1, -20, 0, 15)
+    sliderBg.Position = UDim2.new(0, 10, 0, 30)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     sliderBg.Text = ""
     sliderBg.Parent = frame
     
@@ -276,7 +269,7 @@ addToggle(cMurder, "Kill Aura", function(v) _G.KillAuraOn = v end)
 addSlider(cMurder, "Zasięg Kill Aury", 10, 100, 10, function(v) _G.KillAuraRangeVal = v end)
 
 local btnKillAll = Instance.new("TextButton")
-btnKillAll.Size = UDim2.new(1, 0, 0, 42)
+btnKillAll.Size = UDim2.new(1, 0, 0, 40)
 btnKillAll.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 btnKillAll.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnKillAll.TextSize = 14
@@ -302,7 +295,7 @@ end)
 -- ZAKŁADKA: SHERIFF
 -------------------------------------------------
 local btnGun = Instance.new("TextButton")
-btnGun.Size = UDim2.new(1, 0, 0, 42)
+btnGun.Size = UDim2.new(1, 0, 0, 40)
 btnGun.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 btnGun.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnGun.TextSize = 13
@@ -323,7 +316,7 @@ end)
 addToggle(cSheriff, "Auto Podnoszenie Broni", function(v) _G.AutoGrabGunOn = v end)
 
 -------------------------------------------------
--- ZAKŁADKA: PLAYER (Z Niewidzialnością)
+-- ZAKŁADKA: PLAYER (Z Niewidzialnością i Zmianą w Zombie)
 -------------------------------------------------
 addSlider(cPlayer, "Prędkość (WalkSpeed)", 1, 1000, 16, function(v)
     _G.SpeedVal = v
@@ -345,19 +338,8 @@ addSlider(cPlayer, "Prędkość Fly", 1, 1000, 50, function(v) _G.FlySpeedVal = 
 addToggle(cPlayer, "Noclip", function(v) _G.NoclipOn = v end)
 addToggle(cPlayer, "Infinite Jump", function(v) _G.InfJumpOn = v end)
 addToggle(cPlayer, "Fly (Latanie)", function(v) _G.FlyOn = v end)
-
-addToggle(cPlayer, "Niewidzialność (Invisibility)", function(v)
-    _G.InvisibilityOn = v
-    if LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                part.Transparency = v and 1 or 0
-            elseif part:IsA("Decal") then
-                part.Transparency = v and 1 or 0
-            end
-        end
-    end
-end)
+addToggle(cPlayer, "Niewidzialność (Invisibility)", function(v) _G.InvisibilityOn = v end)
+addToggle(cPlayer, "Zamiana w Zombie", function(v) _G.ZombieOn = v end)
 
 -------------------------------------------------
 -- ZAKŁADKA: ESP
@@ -368,7 +350,7 @@ addToggle(cEsp, "ESP Coinów (Monety)", function(v) _G.EspCoinsOn = v end)
 addToggle(cEsp, "ESP Trapów (Pułapki)", function(v) _G.EspTrapsOn = v end)
 
 -------------------------------------------------
--- PĘTLE W TLE
+-- PĘTLE DZIAŁAJĄCE W TLE
 -------------------------------------------------
 RunService.Stepped:Connect(function()
     if _G.NoclipOn and LocalPlayer.Character then
@@ -391,6 +373,14 @@ RunService.Stepped:Connect(function()
                 part.Transparency = 1
             elseif part:IsA("Decal") then
                 part.Transparency = 1
+            end
+        end
+    end
+    
+    if _G.ZombieOn and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.BrickColor = BrickColor.new("Dark green")
             end
         end
     end
@@ -524,4 +514,4 @@ RunService.RenderStepped:Connect(function()
         local moveDirection = humanoid.MoveDirection
         local velocity = Vector3.new(0, 0, 0)
         if moveDirection.Magnitude > 0 then
-            velocity = camera.CFrame.LookVector * (
+            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeedVal) + camera.CFr
