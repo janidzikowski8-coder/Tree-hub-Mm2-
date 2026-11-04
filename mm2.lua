@@ -1,4 +1,4 @@
--- Jasiu Hub V3 | Murder Mystery 2 (Rayfield + Auto Farm + Silent Aim + Anti-AFK)
+-- Jasiu Hub V3 | Murder Mystery 2 (Rayfield + Coin Aura + Spectate + Role Alerts)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -12,9 +12,9 @@ local Window = Rayfield:CreateWindow({
 -- Zakładki
 local TabMurder = Window:CreateTab("Murder", 4483362458)
 local TabSheriff = Window:CreateTab("Sheriff", 4483362458)
-local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
+local TabFarm = Window:CreateTab("Auto/Coin Aura", 4483362458)
 local TabPlayer = Window:CreateTab("Player", 4483362458)
-local TabEsp = Window:CreateTab("ESP", 4483362458)
+local TabEsp = Window:CreateTab("ESP & Alert", 4483362458)
 local TabUtility = Window:CreateTab("Utility", 4483362458)
 local TabTroll = Window:CreateTab("Troll", 4483362458)
 
@@ -26,6 +26,7 @@ local CoreGui = game:GetService("CoreGui")
 local TeleportService = game:GetService("TeleportService")
 local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
 
 _G.KillAuraOn = false
 _G.KillAuraRange = 15
@@ -42,8 +43,11 @@ _G.EspNamesOn = false
 _G.EspGunDropOn = false
 _G.AutoShootSheriff = false
 _G.AutoFarmCoins = false
+_G.CoinAuraOn = false
 _G.CrosshairOn = false
 _G.AntiAfkOn = true
+_G.GodmodeOn = false
+_G.RoleAlertOn = false
 
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
@@ -85,7 +89,7 @@ TabMurder:CreateButton({
 -- ZAKŁADKA: SHERIFF
 -------------------------------------------------
 TabSheriff:CreateToggle({
-   Name = "🎯 Auto-Shoot / Silent Aim (Strzał w Murderera)",
+   Name = "🎯 PRO Auto-Shoot / Silent Aim",
    CurrentValue = false,
    Flag = "AutoShoot",
    Callback = function(Value) _G.AutoShootSheriff = Value end,
@@ -105,13 +109,20 @@ TabSheriff:CreateButton({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: AUTO FARM
+-- ZAKŁADKA: AUTO / COIN AURA
 -------------------------------------------------
 TabFarm:CreateToggle({
-   Name = "🪙 Auto-Farm Monet (Teleport do Coinów)",
+   Name = "🪙 Auto-Farm Monet (Teleport)",
    CurrentValue = false,
    Flag = "AutoFarm",
    Callback = function(Value) _G.AutoFarmCoins = Value end,
+})
+
+TabFarm:CreateToggle({
+   Name = "🧲 Coin Aura (Przyciąganie monet bez teleportu)",
+   CurrentValue = false,
+   Flag = "CoinAura",
+   Callback = function(Value) _G.CoinAuraOn = Value end,
 })
 
 -------------------------------------------------
@@ -170,7 +181,7 @@ TabPlayer:CreateToggle({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: ESP
+-- ZAKŁADKA: ESP & ALERTS
 -------------------------------------------------
 TabEsp:CreateToggle({
    Name = "ESP Ról (Kolory postaci)",
@@ -207,8 +218,15 @@ TabEsp:CreateToggle({
    Callback = function(Value) _G.EspGunDropOn = Value end,
 })
 
+TabEsp:CreateToggle({
+   Name = "🚨 Powiadomienia o rolach (Role Alert)",
+   CurrentValue = false,
+   Flag = "RoleAlert",
+   Callback = function(Value) _G.RoleAlertOn = Value end,
+})
+
 -------------------------------------------------
--- ZAKŁADKA: UTILITY & VISUAL
+-- ZAKŁADKA: UTILITY & SPECTATE
 -------------------------------------------------
 local crosshairGui = nil
 TabUtility:CreateToggle({
@@ -239,8 +257,53 @@ TabUtility:CreateToggle({
    end,
 })
 
+-- Dynamiczna lista do Spectate
+local spectateTarget = ""
+local playerListForSpectate = {}
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then table.insert(playerListForSpectate, p.Name) end
+end
+
+TabUtility:CreateDropdown({
+   Name = "Wybierz gracza do podglądu (Spectate)",
+   Options = playerListForSpectate,
+   CurrentOption = "",
+   Flag = "SpectateDropdown",
+   Callback = function(Option)
+      spectateTarget = Option
+   end,
+})
+
 TabUtility:CreateToggle({
-   Name = "🛡️ Anti-AFK (Ochrona przed AFK Kick)",
+   Name = "👁️ Włącz tryb podglądu (Spectate)",
+   CurrentValue = false,
+   Flag = "SpectateToggle",
+   Callback = function(Value)
+      if Value and spectateTarget ~= "" then
+          task.spawn(function()
+              while _G.SpectateActive do
+                  task.wait()
+                  local targetP = Players:FindFirstChild(spectateTarget)
+                  if targetP and targetP.Character and targetP.Character:FindFirstChild("HumanoidRootPart") then
+                      Camera.CameraSubject = targetP.Character.Humanoid
+                  end
+              end
+          end)
+      else
+          Camera.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") or nil
+      end
+   end,
+})
+
+TabUtility:CreateToggle({
+   Name = "🛡️ Godmode / Anti-Damage",
+   CurrentValue = false,
+   Flag = "GodmodeToggle",
+   Callback = function(Value) _G.GodmodeOn = Value end,
+})
+
+TabUtility:CreateToggle({
+   Name = "🛡️ Anti-AFK",
    CurrentValue = true,
    Flag = "AntiAfkToggle",
    Callback = function(Value) _G.AntiAfkOn = Value end,
@@ -254,7 +317,7 @@ TabUtility:CreateButton({
 })
 
 TabUtility:CreateButton({
-   Name = "🔁 Rejoin (Dołącz ponownie do tego samego serwera)",
+   Name = "🔁 Rejoin (Dołącz ponownie)",
    Callback = function()
       TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
    end,
@@ -278,7 +341,6 @@ TabTroll:CreateButton({
 -------------------------------------------------
 -- GŁÓWNE PĘTLE W TLE
 -------------------------------------------------
--- Anti-AFK
 LocalPlayer.Idled:Connect(function()
     if _G.AntiAfkOn then
         VirtualUser:Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
@@ -287,20 +349,43 @@ LocalPlayer.Idled:Connect(function()
     end
 end)
 
--- Auto Farm Coinów w tle
+-- Auto Farm & Coin Aura
 task.spawn(function()
     while true do
-        task.wait(0.3)
-        if _G.AutoFarmCoins and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v.Name == "CoinContainer" or v.Name == "Coin" then
-                    if v:IsA("BasePart") then
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
-                        task.wait(0.2)
+        task.wait(0.2)
+        pcall(function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local myRoot = LocalPlayer.Character.HumanoidRootPart
+                
+                -- Auto Farm
+                if _G.AutoFarmCoins then
+                    for _, v in pairs(Workspace:GetDescendants()) do
+                        if not _G.AutoFarmCoins then break end
+                        if v.Name == "CoinContainer" or v.Name == "Coin" then
+                            local part = v:IsA("Model") and v.PrimaryPart or v
+                            if part and part:IsA("BasePart") then
+                                myRoot.CFrame = part.CFrame + Vector3.new(0, 2, 0)
+                                task.wait(0.15)
+                            end
+                        end
+                    end
+                end
+                
+                -- Coin Aura (Przyciąganie w promieniu 25 studów)
+                if _G.CoinAuraOn then
+                    for _, v in pairs(Workspace:GetDescendants()) do
+                        if v.Name == "CoinContainer" or v.Name == "Coin" then
+                            local part = v:IsA("Model") and v.PrimaryPart or v
+                            if part and part:IsA("BasePart") then
+                                if (myRoot.Position - part.Position).Magnitude <= 25 then
+                                    part.CFrame = myRoot.CFrame
+                                end
+                            end
+                        end
                     end
                 end
             end
-        end
+        end)
     end
 end)
 
@@ -308,6 +393,14 @@ RunService.Stepped:Connect(function()
     if _G.NoclipOn and LocalPlayer.Character then
         for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
             if v:IsA("BasePart") then v.CanCollide = false end
+        end
+    end
+    
+    if _G.GodmodeOn and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.MaxHealth = math.huge
+            hum.Health = math.huge
         end
     end
     
@@ -333,7 +426,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Auto-Shoot Sheriff (Celowanie w Murderera)
+    -- Pro Auto-Shoot Szeryfa
     if _G.AutoShootSheriff and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local gun = LocalPlayer.Character:FindFirstChild("Gun") or LocalPlayer.Backpack:FindFirstChild("Gun") or LocalPlayer.Character:FindFirstChild("Revolver") or LocalPlayer.Backpack:FindFirstChild("Revolver")
         if gun then
@@ -341,7 +434,9 @@ RunService.Stepped:Connect(function()
                 if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                     local isMurderer = p.Character:FindFirstChild("Knife") or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
                     if isMurderer then
-                        gun.Parent = LocalPlayer.Character
+                        if gun.Parent ~= LocalPlayer.Character then
+                            gun.Parent = LocalPlayer.Character
+                        end
                         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position, p.Character.HumanoidRootPart.Position)
                         pcall(function() gun:Activate() end)
                     end
@@ -350,7 +445,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Szybkie ESP Ról
+    -- ESP Ról i Nazw
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local char = p.Character
@@ -475,24 +570,4 @@ end)
 
 game:GetService("UserInputService").JumpRequest:Connect(function()
     if _G.InfJumpOn then
-        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end
-end)
-
-local camera = Workspace.CurrentCamera
-RunService.RenderStepped:Connect(function()
-    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        local rootPart = LocalPlayer.Character.HumanoidRootPart
-        local humanoid = LocalPlayer.Character.Humanoid
-        humanoid.PlatformStand = true
-        local moveDirection = humanoid.MoveDirection
-        local velocity = Vector3.new(0, 0, 0)
-        if moveDirection.Magnitude > 0 then
-            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
-        end
-        rootPart.Velocity = velocity
-    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.PlatformStand = false
-    end
-end)
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass
