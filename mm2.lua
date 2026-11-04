@@ -1,5 +1,12 @@
--- Jasiu Hub V4 | Murder Mystery 2 (Clean & Stable Edition dla Arceus X)
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+-- Jasiu Hub V4 | Murder Mystery 2 (Bezpośrednie odpalenie dla Arceus X)
+local success, Rayfield = pcall(function()
+    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+end)
+
+if not success or not Rayfield then
+    warn("Nie udało się załadować biblioteki Rayfield!")
+    return
+end
 
 local Window = Rayfield:CreateWindow({
    Name = "Jasiu Hub V4 🌲 | MM2 Ultimate Pro",
@@ -537,7 +544,7 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
 end)
 
 RunService.RenderStepped:Connect(function()
-    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
+    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart"] and LocalPlayer.Character:FindFirstChild("Humanoid") then
         local rootPart = LocalPlayer.Character.HumanoidRootPart
         local humanoid = LocalPlayer.Character.Humanoid
         humanoid.PlatformStand = true
@@ -551,3 +558,4 @@ RunService.RenderStepped:Connect(function()
         LocalPlayer.Character.Humanoid.PlatformStand = false
     end
 end)
+   
