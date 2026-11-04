@@ -1,30 +1,22 @@
--- Jasiu Hub V4 (Fluent UI Edition) | Murder Mystery 2 dla Arceus X
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+-- Jasiu Hub V4 | Murder Mystery 2 (Rayfield Edition dla Arceus X)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local Window = Fluent:CreateWindow({
-    Title = "Jasiu Hub V4 🌲 | MM2 Ultimate Fluent",
-    SubTitle = "Dedykowane dla Arceus X",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = false, -- Wyłączone akrylowe rozmycie dla maksymalnej wydajności na telefonie
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.LeftControl
+local Window = Rayfield:CreateWindow({
+   Name = "Jasiu Hub V4 🌲 | MM2 Ultimate Pro",
+   LoadingTitle = "Ładowanie Jasiu Hub V4...",
+   LoadingSubtitle = "Oficjalna wersja Rayfield dla Arceus X",
+   ConfigurationSaving = { Enabled = false },
+   KeySystem = false,
 })
 
 -- Zakładki
-local Tabs = {
-    Murder = Window:AddTab({ Title = "Murder", Icon = "sword" }),
-    Sheriff = Window:AddTab({ Title = "Sheriff", Icon = "crosshair" }),
-    Farm = Window:AddTab({ Title = "Auto Farm", Icon = "coins" }),
-    Player = Window:AddTab({ Title = "Player", Icon = "user" }),
-    Esp = Window:AddTab({ Title = "ESP & Alerts", Icon = "eye" }),
-    Utility = Window:AddTab({ Title = "Utility", Icon = "wrench" }),
-    Troll = Window:AddTab({ Title = "Troll", Icon = "ghost" })
-}
-
-local Options = Fluent.Options
+local TabMurder = Window:CreateTab("Murder", 4483362458)
+local TabSheriff = Window:CreateTab("Sheriff", 4483362458)
+local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
+local TabPlayer = Window:CreateTab("Player", 4483362458)
+local TabEsp = Window:CreateTab("ESP & Alerts", 4483362458)
+local TabUtility = Window:CreateTab("Utility", 4483362458)
+local TabTroll = Window:CreateTab("Troll", 4483362458)
 
 -- Serwisy i Zmienne
 local Players = game:GetService("Players")
@@ -60,285 +52,270 @@ _G.FovVal = 70
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
 -------------------------------------------------
-Tabs.Murder:AddToggle("KillAuraToggle", {
-    Title = "⚡ Ultra Kill Aura Pro",
-    Default = false,
-    Callback = function(Value)
-        _G.KillAuraOn = Value
-    end
+TabMurder:CreateToggle({
+   Name = "⚡ Ultra Kill Aura Pro",
+   CurrentValue = false,
+   Flag = "KillAura",
+   Callback = function(Value) _G.KillAuraOn = Value end,
 })
 
-Tabs.Murder:AddSlider("KARangeSlider", {
-    Title = "Zasięg Kill Aury",
-    Description = "Wybierz promień działania",
-    Default = 15,
-    Min = 10,
-    Max = 150,
-    Rounding = 0,
-    Callback = function(Value)
-        _G.KillAuraRange = Value
-    end
+TabMurder:CreateSlider({
+   Name = "Zasięg Kill Aury",
+   Range = {10, 150},
+   Increment = 5,
+   Suffix = " studów",
+   CurrentValue = 15,
+   Flag = "KARange",
+   Callback = function(Value) _G.KillAuraRange = Value end,
 })
 
-Tabs.Murder:AddButton({
-    Title = "🔥 KILL ALL",
-    Description = "Zabij wszystkich graczy na mapie",
-    Callback = function()
-        local knife = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife"))
-        if knife then
-            knife.Parent = LocalPlayer.Character
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-                    pcall(function() knife:Activate() end)
-                end
-            end
-        end
-    end
+TabMurder:CreateButton({
+   Name = "🔥 KILL ALL (Zabij wszystkich)",
+   Callback = function()
+      local knife = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife"))
+      if knife then
+          knife.Parent = LocalPlayer.Character
+          for _, p in pairs(Players:GetPlayers()) do
+              if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
+                  pcall(function() knife:Activate() end)
+              end
+          end
+      end
+   end,
 })
 
 -------------------------------------------------
 -- ZAKŁADKA: SHERIFF
 -------------------------------------------------
-Tabs.Sheriff:AddToggle("AutoShootToggle", {
-    Title = "🎯 Auto-Shoot / Silent Aim",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoShootSheriff = Value
-    end
+TabSheriff:CreateToggle({
+   Name = "🎯 Auto-Shoot / Silent Aim (Strzał w Murderera)",
+   CurrentValue = false,
+   Flag = "AutoShoot",
+   Callback = function(Value) _G.AutoShootSheriff = Value end,
 })
 
-Tabs.Sheriff:AddButton({
-    Title = "Teleport do upuszczonej broni",
-    Description = "Złap pistolet, gdy szeryf zginie",
-    Callback = function()
-        for _, v in pairs(Workspace:GetChildren()) do
-            if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
-                end
-            end
-        end
-    end
+TabSheriff:CreateButton({
+   Name = "Teleport do upuszczonej broni",
+   Callback = function()
+      for _, v in pairs(Workspace:GetChildren()) do
+          if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
+              if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+              end
+          end
+      end
+   end,
 })
 
 -------------------------------------------------
 -- ZAKŁADKA: AUTO FARM
 -------------------------------------------------
-Tabs.Farm:AddToggle("AutoFarmToggle", {
-    Title = "🪙 Auto-Farm Monet (Teleport)",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoFarmCoins = Value
-    end
+TabFarm:CreateToggle({
+   Name = "🪙 Auto-Farm Monet (Teleport do Coinów)",
+   CurrentValue = false,
+   Flag = "AutoFarm",
+   Callback = function(Value) _G.AutoFarmCoins = Value end,
 })
 
-Tabs.Farm:AddToggle("CoinAuraToggle", {
-    Title = "🧲 Coin Aura (Magnes 25 studów)",
-    Default = false,
-    Callback = function(Value)
-        _G.CoinAuraOn = Value
-    end
+TabFarm:CreateToggle({
+   Name = "🧲 Coin Aura (Przyciąganie monet w promieniu 25m)",
+   CurrentValue = false,
+   Flag = "CoinAura",
+   Callback = function(Value) _G.CoinAuraOn = Value end,
 })
 
 -------------------------------------------------
 -- ZAKŁADKA: PLAYER
 -------------------------------------------------
-Tabs.Player:AddSlider("SpeedSlider", {
-    Title = "Prędkość (WalkSpeed)",
-    Default = 16,
-    Min = 16,
-    Max = 250,
-    Rounding = 0,
-    Callback = function(Value)
-        _G.SpeedVal = Value
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.WalkSpeed = Value
-        end
-    end
+TabPlayer:CreateSlider({
+   Name = "Prędkość (WalkSpeed)",
+   Range = {16, 250},
+   Increment = 1,
+   Suffix = "",
+   CurrentValue = 16,
+   Flag = "WalkSpeed",
+   Callback = function(Value)
+      _G.SpeedVal = Value
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+          LocalPlayer.Character.Humanoid.WalkSpeed = Value
+      end
+   end,
 })
 
-Tabs.Player:AddSlider("JumpSlider", {
-    Title = "Siła Skoku (JumpPower)",
-    Default = 50,
-    Min = 50,
-    Max = 300,
-    Rounding = 0,
-    Callback = function(Value)
-        _G.JumpVal = Value
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.UseJumpPower = true
-            LocalPlayer.Character.Humanoid.JumpPower = Value
-        end
-    end
+TabPlayer:CreateSlider({
+   Name = "Siła Skoku (JumpPower)",
+   Range = {50, 300},
+   Increment = 5,
+   Suffix = "",
+   CurrentValue = 50,
+   Flag = "JumpPower",
+   Callback = function(Value)
+      _G.JumpVal = Value
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+          LocalPlayer.Character.Humanoid.UseJumpPower = true
+          LocalPlayer.Character.Humanoid.JumpPower = Value
+      end
+   end,
 })
 
-Tabs.Player:AddSlider("FovSlider", {
-    Title = "FOV (Pole widzenia)",
-    Default = 70,
-    Min = 70,
-    Max = 120,
-    Rounding = 0,
-    Callback = function(Value)
-        _G.FovVal = Value
-        Camera.FieldOfView = Value
-    end
+TabPlayer:CreateSlider({
+   Name = "FOV (Pole widzenia)",
+   Range = {70, 120},
+   Increment = 1,
+   Suffix = "°",
+   CurrentValue = 70,
+   Flag = "FovSlider",
+   Callback = function(Value)
+      _G.FovVal = Value
+      Camera.FieldOfView = Value
+   end,
 })
 
-Tabs.Player:AddButton({
-    Title = "🛡️ Safe Zone",
-    Description = "Teleportuj się 50 studów w górę",
-    Callback = function()
-        pcall(function()
-            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                root.CFrame = root.CFrame + Vector3.new(0, 50, 0)
-            end
-        end)
-    end
+TabPlayer:CreateButton({
+   Name = "🛡️ Safe Zone (Teleport na górę mapy)",
+   Callback = function()
+      pcall(function()
+          local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+          if root then
+              root.CFrame = root.CFrame + Vector3.new(0, 50, 0)
+          end
+      end)
+   end,
 })
 
-Tabs.Player:AddToggle("NoclipToggle", {
-    Title = "Noclip",
-    Default = false,
-    Callback = function(Value)
-        _G.NoclipOn = Value
-    end
+TabPlayer:CreateToggle({
+   Name = "Noclip (Przenikanie przez ściany)",
+   CurrentValue = false,
+   Flag = "Noclip",
+   Callback = function(Value) _G.NoclipOn = Value end,
 })
 
-Tabs.Player:AddToggle("InfJumpToggle", {
-    Title = "Infinite Jump",
-    Default = false,
-    Callback = function(Value)
-        _G.InfJumpOn = Value
-    end
+TabPlayer:CreateToggle({
+   Name = "Infinite Jump (Nieskończony skok)",
+   CurrentValue = false,
+   Flag = "InfJump",
+   Callback = function(Value) _G.InfJumpOn = Value end,
 })
 
-Tabs.Player:AddToggle("FlyToggle", {
-    Title = "Fly (Latanie)",
-    Default = false,
-    Callback = function(Value)
-        _G.FlyOn = Value
-    end
+TabPlayer:CreateToggle({
+   Name = "Fly (Latanie)",
+   CurrentValue = false,
+   Flag = "Fly",
+   Callback = function(Value) _G.FlyOn = Value end,
 })
 
 -------------------------------------------------
 -- ZAKŁADKA: ESP & ALERTS
 -------------------------------------------------
-Tabs.Esp:AddToggle("RoleAlertToggle", {
-    Title = "🔔 Role Alerts",
-    Default = true,
-    Callback = function(Value)
-        _G.RoleAlertOn = Value
-    end
+TabEsp:CreateToggle({
+   Name = "🔔 Role Alerts (Powiadomienia o roli na starcie)",
+   CurrentValue = true,
+   Flag = "RoleAlertToggle",
+   Callback = function(Value) _G.RoleAlertOn = Value end,
 })
 
-Tabs.Esp:AddToggle("EspRolesToggle", {
-    Title = "ESP Ról (Kolory postaci)",
-    Default = false,
-    Callback = function(Value)
-        _G.EspRolesOn = Value
-    end
+TabEsp:CreateToggle({
+   Name = "ESP Ról (Kolory postaci)",
+   CurrentValue = false,
+   Flag = "EspRoles",
+   Callback = function(Value) _G.EspRolesOn = Value end,
 })
 
-Tabs.Esp:AddToggle("EspNamesToggle", {
-    Title = "ESP Nazw i Ról nad głowami",
-    Default = false,
-    Callback = function(Value)
-        _G.EspNamesOn = Value
-    end
+TabEsp:CreateToggle({
+   Name = "ESP Nazw i Ról nad głowami",
+   CurrentValue = false,
+   Flag = "EspNames",
+   Callback = function(Value) _G.EspNamesOn = Value end,
 })
 
-Tabs.Esp:AddToggle("EspCoinsToggle", {
-    Title = "ESP Coinów",
-    Default = false,
-    Callback = function(Value)
-        _G.EspCoinsOn = Value
-    end
+TabEsp:CreateToggle({
+   Name = "ESP Coinów (Monety)",
+   CurrentValue = false,
+   Flag = "EspCoins",
+   Callback = function(Value) _G.EspCoinsOn = Value end,
 })
 
-Tabs.Esp:AddToggle("EspTrapsToggle", {
-    Title = "ESP Trapów",
-    Default = false,
-    Callback = function(Value)
-        _G.EspTrapsOn = Value
-    end
+TabEsp:CreateToggle({
+   Name = "ESP Trapów (Pułapki)",
+   CurrentValue = false,
+   Flag = "EspTraps",
+   Callback = function(Value) _G.EspTrapsOn = Value end,
 })
 
-Tabs.Esp:AddToggle("EspGunDropToggle", {
-    Title = "ESP Dropped Gun",
-    Default = false,
-    Callback = function(Value)
-        _G.EspGunDropOn = Value
-    end
+TabEsp:CreateToggle({
+   Name = "ESP Dropped Gun (Widoczność leżącej broni)",
+   CurrentValue = false,
+   Flag = "EspGunDrop",
+   Callback = function(Value) _G.EspGunDropOn = Value end,
 })
 
 -------------------------------------------------
--- ZAKŁADKA: UTILITY
+-- ZAKŁADKA: UTILITY & VISUAL
 -------------------------------------------------
 local crosshairGui = nil
-Tabs.Utility:AddToggle("CrosshairToggle", {
-    Title = "🎯 Customowy Celownik",
-    Default = false,
-    Callback = function(Value)
-        _G.CrosshairOn = Value
-        if Value then
-            if not crosshairGui then
-                crosshairGui = Instance.new("ScreenGui")
-                crosshairGui.Name = "JasiuCrosshair"
-                crosshairGui.Parent = CoreGui
-                
-                local dot = Instance.new("Frame")
-                dot.Size = UDim2.new(0, 6, 0, 6)
-                dot.Position = UDim2.new(0.5, -3, 0.5, -3)
-                dot.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-                dot.BorderSizePixel = 0
-                dot.Parent = crosshairGui
-            end
-        else
-            if crosshairGui then
-                crosshairGui:Destroy()
-                crosshairGui = nil
-            end
-        end
-    end
+TabUtility:CreateToggle({
+   Name = "🎯 Customowy Celownik (Crosshair)",
+   CurrentValue = false,
+   Flag = "CrosshairToggle",
+   Callback = function(Value)
+      _G.CrosshairOn = Value
+      if Value then
+          if not crosshairGui then
+              crosshairGui = Instance.new("ScreenGui")
+              crosshairGui.Name = "JasiuCrosshair"
+              crosshairGui.Parent = CoreGui
+              
+              local dot = Instance.new("Frame")
+              dot.Size = UDim2.new(0, 6, 0, 6)
+              dot.Position = UDim2.new(0.5, -3, 0.5, -3)
+              dot.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+              dot.BorderSizePixel = 0
+              dot.Parent = crosshairGui
+          end
+      else
+          if crosshairGui then
+              crosshairGui:Destroy()
+              crosshairGui = nil
+          end
+      end
+   end,
 })
 
-Tabs.Utility:AddToggle("AntiAfkToggle", {
-    Title = "🛡️ Anti-AFK",
-    Default = true,
-    Callback = function(Value)
-        _G.AntiAfkOn = Value
-    end
+TabUtility:CreateToggle({
+   Name = "🛡️ Anti-AFK (Ochrona przed AFK Kick)",
+   CurrentValue = true,
+   Flag = "AntiAfkToggle",
+   Callback = function(Value) _G.AntiAfkOn = Value end,
 })
 
-Tabs.Utility:AddButton({
-    Title = "🔄 Server Hop",
-    Callback = function()
-        TeleportService:Teleport(game.PlaceId, LocalPlayer)
-    end
+TabUtility:CreateButton({
+   Name = "🔄 Server Hop (Zmień serwer)",
+   Callback = function()
+      TeleportService:Teleport(game.PlaceId, LocalPlayer)
+   end,
 })
 
-Tabs.Utility:AddButton({
-    Title = "🔁 Rejoin",
-    Callback = function()
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-    end
+TabUtility:CreateButton({
+   Name = "🔁 Rejoin (Dołącz ponownie do tego samego serwera)",
+   Callback = function()
+      TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+   end,
 })
 
 -------------------------------------------------
 -- ZAKŁADKA: TROLL
 -------------------------------------------------
-Tabs.Troll:AddButton({
-    Title = "🌀 Skok-Zmyłka (Teleport 15 studów w górę)",
-    Callback = function()
-        pcall(function()
-            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                root.CFrame = root.CFrame + Vector3.new(0, 15, 0)
-            end
-        end)
-    end
+TabTroll:CreateButton({
+   Name = "🌀 Skok-Zmyłka (Teleportuj się 15 studów w górę)",
+   Callback = function()
+      pcall(function()
+          local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+          if root then
+              root.CFrame = root.CFrame + Vector3.new(0, 15, 0)
+          end
+      end)
+   end,
 })
 
 -------------------------------------------------
@@ -567,7 +544,10 @@ RunService.RenderStepped:Connect(function()
         local moveDirection = humanoid.MoveDirection
         local velocity = Vector3.new(0, 0, 0)
         if moveDirection.Magnitude > 0 then
-            velocity = Camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + Camera.CFeed.RightVector * (moveDirection.X * _G.FlySpeed)
+            velocity = Camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + Camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
         end
         rootPart.Velocity = velocity
-    elsei
+    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.PlatformStand = false
+    end
+end)
