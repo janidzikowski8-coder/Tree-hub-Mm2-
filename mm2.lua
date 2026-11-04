@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Zaawansowane Menu Mobilne z Toggle, ESP Extra i Niewidzialnością)
+-- Jasiu Hub V2 | Murder Mystery 2 (Prawdziwe Freeze All w zakładce Troll)
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -24,15 +24,16 @@ _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
 _G.InvisibilityOn = false
+_G.FreezeAllOn = false
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JasiuHubV2"
 ScreenGui.Parent = CoreGui
 
--- Główne okno (Powiększone dla wygody mobilnej)
+-- Główne okno (Powiększone do 420x460 dla nowej zakładki)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 380, 0, 450)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -225)
+MainFrame.Size = UDim2.new(0, 420, 0, 460)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -230)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -111,7 +112,7 @@ OpenIcon.MouseButton1Click:Connect(function()
     OpenIcon.Visible = false
 end)
 
--- Pasek zakładek u góry (Murder, Sheriff, Player, ESP)
+-- Pasek zakładek u góry (Murder, Sheriff, Player, ESP, Troll)
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -10, 0, 32)
 TabBar.Position = UDim2.new(0, 5, 0, 40)
@@ -121,7 +122,7 @@ TabBar.Parent = MainFrame
 local TabList = Instance.new("UIListLayout")
 TabList.FillDirection = Enum.FillDirection.Horizontal
 TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-TabList.Padding = UDim.new(0, 5)
+TabList.Padding = UDim.new(0, 4)
 TabList.Parent = TabBar
 
 local Containers = {}
@@ -146,10 +147,10 @@ end
 
 local function createTabButton(name, targetContainer)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 84, 1, 0)
+    btn.Size = UDim2.new(0, 74, 1, 0) -- Wąskie przyciski dopasowane do 5 zakładek
     btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 13
+    btn.TextSize = 12
     btn.Font = Enum.Font.SourceSansBold
     btn.Text = name
     btn.Parent = TabBar
@@ -166,11 +167,13 @@ local cMurder = createContainer("Murder")
 local cSheriff = createContainer("Sheriff")
 local cPlayer = createContainer("Player")
 local cEsp = createContainer("ESP")
+local cTroll = createContainer("Troll")
 
 createTabButton("Murder", cMurder)
 createTabButton("Sheriff", cSheriff)
 createTabButton("Player", cPlayer)
 createTabButton("ESP", cEsp)
+createTabButton("Troll", cTroll)
 
 cMurder.Visible = true
 
@@ -266,7 +269,6 @@ end
 addToggle(cMurder, "Kill Aura", function(v) _G.KillAuraOn = v end)
 addSlider(cMurder, "Zasięg Kill Aury", 10, 100, 10, function(v) _G.KillAuraRangeVal = v end)
 
--- Przycisk KILL ALL (Zabij wszystkich naraz)
 local btnKillAll = Instance.new("TextButton")
 btnKillAll.Size = UDim2.new(1, 0, 0, 40)
 btnKillAll.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -313,7 +315,7 @@ btnGun.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------
--- ZAKŁADKA: PLAYER (Dodano Niewidzialność)
+-- ZAKŁADKA: PLAYER
 -------------------------------------------------
 addSlider(cPlayer, "Prędkość (WalkSpeed)", 1, 1000, 16, function(v)
     _G.SpeedVal = v
@@ -338,12 +340,30 @@ addToggle(cPlayer, "Fly (Latanie)", function(v) _G.FlyOn = v end)
 addToggle(cPlayer, "Niewidzialność (Invisibility)", function(v) _G.InvisibilityOn = v end)
 
 -------------------------------------------------
--- ZAKŁADKA: ESP (Role, Names, Coins, Traps)
+-- ZAKŁADKA: ESP
 -------------------------------------------------
 addToggle(cEsp, "ESP Ról (Kolory postaci)", function(v) _G.EspRolesOn = v end)
 addToggle(cEsp, "ESP Nazw i Ról nad głowami", function(v) _G.EspNamesOn = v end)
 addToggle(cEsp, "ESP Coinów (Monety)", function(v) _G.EspCoinsOn = v end)
 addToggle(cEsp, "ESP Trapów (Pułapki)", function(v) _G.EspTrapsOn = v end)
+
+-------------------------------------------------
+-- ZAKŁADKA: TROLL (Prawdziwe Freeze All)
+-------------------------------------------------
+addToggle(cTroll, "Freeze All (Zamroź wszystkich)", function(v) 
+    _G.FreezeAllOn = v 
+    if not v then
+        -- Odmroź graczy po wyłączeniu
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                local root = p.Character:FindFirstChild("HumanoidRootPart")
+                if hum then hum.WalkSpeed = 16 end
+                if root then root.Anchored = false end
+            end
+        end
+    end
+end)
 
 -------------------------------------------------
 -- PĘTLE DZIAŁAJĄCE W TLE
@@ -355,13 +375,24 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Obsługa niewidzialności w tle
     if _G.InvisibilityOn and LocalPlayer.Character then
         for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                 part.Transparency = 1
             elseif part:IsA("Decal") then
                 part.Transparency = 1
+            end
+        end
+    end
+    
+    -- Prawdziwe Freeze All (Blokuje ruch i pozycję innych graczy)
+    if _G.FreezeAllOn then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                local root = p.Character:FindFirstChild("HumanoidRootPart")
+                if hum then hum.WalkSpeed = 0 end
+                if root then root.Anchored = true end
             end
         end
     end
@@ -381,23 +412,22 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- ESP Ról (Highlight) & Nazwy nad głowami
+    -- ESP Ról & Nazwy
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local char = p.Character
-            local col = Color3.fromRGB(0, 255, 0) -- Zielony (Innocent)
+            local col = Color3.fromRGB(0, 255, 0)
             local roleStr = "Innocent"
             
             local bp = p:FindFirstChild("Backpack")
             if (bp and bp:FindFirstChild("Knife")) or char:FindFirstChild("Knife") then
-                col = Color3.fromRGB(255, 0, 0) -- Czerwony (Murder)
+                col = Color3.fromRGB(255, 0, 0)
                 roleStr = "Murderer"
             elseif (bp and bp:FindFirstChild("Gun")) or char:FindFirstChild("Gun") then
-                col = Color3.fromRGB(0, 120, 255) -- Niebieski (Sheriff)
+                col = Color3.fromRGB(0, 120, 255)
                 roleStr = "Sheriff"
             end
             
-            -- Highlight Postaci
             if _G.EspRolesOn then
                 local hl = char:FindFirstChild("JasiuESP")
                 if not hl then
@@ -411,7 +441,6 @@ RunService.Stepped:Connect(function()
                 if char:FindFirstChild("JasiuESP") then char.JasiuESP:Destroy() end
             end
             
-            -- ESP Nazw / Ról nad głową
             if _G.EspNamesOn then
                 local head = char:FindFirstChild("Head")
                 if head then
@@ -493,17 +522,4 @@ end)
 
 local camera = Workspace.CurrentCamera
 RunService.RenderStepped:Connect(function()
-    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        local rootPart = LocalPlayer.Character.HumanoidRootPart
-        local humanoid = LocalPlayer.Character.Humanoid
-        humanoid.PlatformStand = true
-        local moveDirection = humanoid.MoveDirection
-        local velocity = Vector3.new(0, 0, 0)
-        if moveDirection.Magnitude > 0 then
-            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeedVal) + camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeedVal)
-        end
-        rootPart.Velocity = velocity
-    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.PlatformStand = false
-    end
-end)
+    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPar
