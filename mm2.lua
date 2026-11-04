@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + ESP + Skok-Zmyłka)
+-- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Ulepszona Kill Aura Pro + Jumpscare)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -24,10 +24,11 @@ local TabTroll = Window:CreateTab("Troll", 4483362458)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 
 _G.KillAuraOn = false
-_G.KillAuraRange = 10
+_G.KillAuraRange = 15
 _G.SpeedVal = 16
 _G.JumpVal = 50
 _G.NoclipOn = false
@@ -44,24 +45,20 @@ _G.EspGunDropOn = false
 -- ZAKŁADKA: MURDER
 -------------------------------------------------
 TabMurder:CreateToggle({
-   Name = "Kill Aura",
+   Name = "⚡ Ultra Kill Aura",
    CurrentValue = false,
    Flag = "KillAura",
-   Callback = function(Value)
-      _G.KillAuraOn = Value
-   end,
+   Callback = function(Value) _G.KillAuraOn = Value end,
 })
 
 TabMurder:CreateSlider({
    Name = "Zasięg Kill Aury",
-   Range = {10, 100},
+   Range = {10, 150},
    Increment = 5,
    Suffix = " studów",
-   CurrentValue = 10,
+   CurrentValue = 15,
    Flag = "KARange",
-   Callback = function(Value)
-      _G.KillAuraRange = Value
-   end,
+   Callback = function(Value) _G.KillAuraRange = Value end,
 })
 
 TabMurder:CreateButton({
@@ -73,7 +70,9 @@ TabMurder:CreateButton({
           for _, p in pairs(Players:GetPlayers()) do
               if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                   LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-                  pcall(function() knife:Activate() end)
+                  pcall(function() 
+                      knife:Activate() 
+                  end)
               end
           end
       end
@@ -134,27 +133,21 @@ TabPlayer:CreateToggle({
    Name = "Noclip (Przenikanie przez ściany)",
    CurrentValue = false,
    Flag = "Noclip",
-   Callback = function(Value)
-      _G.NoclipOn = Value
-   end,
+   Callback = function(Value) _G.NoclipOn = Value end,
 })
 
 TabPlayer:CreateToggle({
    Name = "Infinite Jump (Nieskończony skok)",
    CurrentValue = false,
    Flag = "InfJump",
-   Callback = function(Value)
-      _G.InfJumpOn = Value
-   end,
+   Callback = function(Value) _G.InfJumpOn = Value end,
 })
 
 TabPlayer:CreateToggle({
    Name = "Fly (Latanie)",
    CurrentValue = false,
    Flag = "Fly",
-   Callback = function(Value)
-      _G.FlyOn = Value
-   end,
+   Callback = function(Value) _G.FlyOn = Value end,
 })
 
 -------------------------------------------------
@@ -164,50 +157,101 @@ TabEsp:CreateToggle({
    Name = "ESP Ról (Kolory postaci)",
    CurrentValue = false,
    Flag = "EspRoles",
-   Callback = function(Value)
-      _G.EspRolesOn = Value
-   end,
+   Callback = function(Value) _G.EspRolesOn = Value end,
 })
 
 TabEsp:CreateToggle({
    Name = "ESP Nazw i Ról nad głowami",
    CurrentValue = false,
    Flag = "EspNames",
-   Callback = function(Value)
-      _G.EspNamesOn = Value
-   end,
+   Callback = function(Value) _G.EspNamesOn = Value end,
 })
 
 TabEsp:CreateToggle({
    Name = "ESP Coinów (Monety)",
    CurrentValue = false,
    Flag = "EspCoins",
-   Callback = function(Value)
-      _G.EspCoinsOn = Value
-   end,
+   Callback = function(Value) _G.EspCoinsOn = Value end,
 })
 
 TabEsp:CreateToggle({
    Name = "ESP Trapów (Pułapki)",
    CurrentValue = false,
    Flag = "EspTraps",
-   Callback = function(Value)
-      _G.EspTrapsOn = Value
-   end,
+   Callback = function(Value) _G.EspTrapsOn = Value end,
 })
 
 TabEsp:CreateToggle({
    Name = "ESP Dropped Gun (Widoczność leżącej broni)",
    CurrentValue = false,
    Flag = "EspGunDrop",
-   Callback = function(Value)
-      _G.EspGunDropOn = Value
-   end,
+   Callback = function(Value) _G.EspGunDropOn = Value end,
 })
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Skok-Zmyłka)
+-- ZAKŁADKA: TROLL (Jumpscare z listą graczy)
 -------------------------------------------------
+local selectedTargetPlayer = ""
+local playerNamesList = {}
+
+for _, p in pairs(Players:GetPlayers()) do
+    table.insert(playerNamesList, p.Name)
+end
+
+TabTroll:CreateDropdown({
+   Name = "Wybierz gracza do Jumpscare'a",
+   Options = playerNamesList,
+   CurrentOption = "",
+   Flag = "JumpscareTarget",
+   Callback = function(Option)
+      selectedTargetPlayer = Option
+   end,
+})
+
+TabTroll:CreateButton({
+   Name = "💥 WYŚLIJ MASAKRYCZNY JUMPSCARE (Głośność 10)",
+   Callback = function()
+      local target = Players:FindFirstChild(selectedTargetPlayer)
+      if target then
+          local isMe = (target == LocalPlayer)
+          local vol = isMe and 10 or 8
+          
+          pcall(function()
+              local gui = Instance.new("ScreenGui")
+              gui.Name = "JasiuJumpscareGUI"
+              gui.IgnoreGuiInset = true
+              gui.Parent = CoreGui
+              
+              local bg = Instance.new("Frame")
+              bg.Size = UDim2.new(1, 0, 1, 0)
+              bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+              bg.Parent = gui
+              
+              local img = Instance.new("ImageLabel")
+              img.Size = UDim2.new(1, 0, 1, 0)
+              img.BackgroundTransparency = 1
+              img.Image = "rbxassetid://1793796746194"
+              img.Parent = bg
+              
+              local sound = Instance.new("Sound")
+              sound.SoundId = "rbxassetid://9069603280"
+              sound.Volume = vol
+              sound.Parent = Workspace
+              sound:Play()
+              
+              task.spawn(function()
+                  for i = 1, 30 do
+                      img.Position = UDim2.new(0, math.random(-25, 25), 0, math.random(-25, 25))
+                      task.wait(0.03)
+                  end
+                  gui:Destroy()
+                  sound:Destroy()
+              end)
+          end)
+      end
+   end,
+})
+
 TabTroll:CreateButton({
    Name = "🌀 Skok-Zmyłka (Teleportuj się 15 studów w górę)",
    Callback = function()
@@ -230,15 +274,24 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- Ulepszony mechanizm Kill Aury Pro
     if _G.KillAuraOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local myRoot = LocalPlayer.Character.HumanoidRootPart
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
+        
         if knife then
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    if (myRoot.Position - p.Character.HumanoidRootPart.Position).Magnitude <= _G.KillAuraRange then
-                        knife.Parent = LocalPlayer.Character
-                        pcall(function() knife:Activate() end)
+                    local targetRoot = p.Character.HumanoidRootPart
+                    local dist = (myRoot.Position - targetRoot.Position).Magnitude
+                    
+                    if dist <= _G.KillAuraRange then
+                        if knife.Parent ~= LocalPlayer.Character then
+                            knife.Parent = LocalPlayer.Character
+                        end
+                        pcall(function()
+                            knife:Activate()
+                        end)
                     end
                 end
             end
@@ -347,7 +400,7 @@ RunService.Stepped:Connect(function()
         end
     end
 
-    -- ESP Dropped Gun (Leżąca broń)
+    -- ESP Dropped Gun
     if _G.EspGunDropOn then
         for _, v in pairs(Workspace:GetChildren()) do
             if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
