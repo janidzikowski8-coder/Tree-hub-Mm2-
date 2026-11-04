@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | MM2 Mobile (Rayfield + Piękna podążająca kula Vortex)
+-- Jasiu Hub V2 | MM2 Mobile (Rayfield + Visual Shaders + Bez Vortexu)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -38,7 +38,6 @@ _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
 _G.EspGunDropOn = false
-_G.VortexActive = false
 
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
@@ -204,45 +203,9 @@ TabEsp:CreateToggle({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Piękny Vortex Podążający za Tobą)
+-- ZAKŁADKA: TROLL (Czysta zakładka)
 -------------------------------------------------
-local vortexOrb = nil
-
-TabTroll:CreateToggle({
-   Name = "🌀 Piękny Vortex Spawner (Chodzi za Tobą)",
-   CurrentValue = false,
-   Flag = "VortexToggle",
-   Callback = function(Value)
-      _G.VortexActive = Value
-      if Value then
-          -- Tworzenie pięknej, świecącej, pulsującej kuli
-          if not vortexOrb and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-              vortexOrb = Instance.new("Part")
-              vortexOrb.Shape = Enum.PartType.Ball
-              vortexOrb.Size = Vector3.new(5, 5, 5)
-              vortexOrb.BrickColor = BrickColor.new("Cyan")
-              vortexOrb.Material = Enum.Material.Neon
-              vortexOrb.CanCollide = false
-              vortexOrb.Anchored = true
-              
-              -- Dodanie świecącego efektu (Highlight/Particle)
-              local fire = Instance.new("Fire")
-              fire.Size = 6
-              fire.Heat = 5
-              fire.Color = Color3.fromRGB(0, 200, 255)
-              fire.SecondaryColor = Color3.fromRGB(255, 0, 255)
-              fire.Parent = vortexOrb
-              
-              vortexOrb.Parent = Workspace
-          end
-      else
-          if vortexOrb then
-              vortexOrb:Destroy()
-              vortexOrb = nil
-          end
-      end
-   end,
-})
+-- (Tutaj możesz w przyszłości dodać inne opcje)
 
 -------------------------------------------------
 -- ZAKŁADKA: VISUAL
@@ -404,25 +367,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Ruchoma, piękna kula Vortex chodząca za Tobą
-    if _G.VortexActive and vortexOrb and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local root = LocalPlayer.Character.HumanoidRootPart
-        -- Obraca się wokół Ciebie i śledzi Twoją pozycję
-        local angle = tick() * 4
-        local offset = Vector3.new(math.cos(angle) * 6, 2, math.sin(angle) * 6)
-        vortexOrb.Position = root.Position + offset
-        
-        -- Wciąganie graczy w pobliżu poza mapę
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                local dist = (p.Character.HumanoidRootPart.Position - vortexOrb.Position).Magnitude
-                if dist <= 8 then
-                    p.Character.HumanoidRootPart.CFrame = CFrame.new(0, -500, 0)
-                end
-            end
-        end
-    end
-    
     if _G.KillAuraOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local myRoot = LocalPlayer.Character.HumanoidRootPart
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
@@ -554,4 +498,33 @@ RunService.Stepped:Connect(function()
         end
     else
         for _, v in pairs(Workspace:GetChildren()) do
-            if v:FindFirstChild("GunHigh
+            if v:FindFirstChild("GunHighlight") then
+                v.GunHighlight:Destroy()
+            end
+        end
+    end
+end)
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if _G.InfJumpOn then
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+local camera = Workspace.CurrentCamera
+RunService.RenderStepped:Connect(function()
+    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        local rootPart = LocalPlayer.Character.HumanoidRootPart
+        local humanoid = LocalPlayer.Character.Humanoid
+        humanoid.PlatformStand = true
+        local moveDirection = humanoid.MoveDirection
+        local velocity = Vector3.new(0, 0, 0)
+        if moveDirection.Magnitude > 0 then
+            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
+        end
+        rootPart.Velocity = velocity
+    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.PlatformStand = false
+    end
+end)
