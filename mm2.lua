@@ -1,10 +1,10 @@
--- Jasiu Hub V4 | Murder Mystery 2 (Ultimate Edition dla Arceus X)
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- Jasiu Hub V4 | Murder Mystery 2 (Clean & Stable Edition dla Arceus X)
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Jasiu Hub V4 🌲 | MM2 Ultimate Pro",
    LoadingTitle = "Ładowanie Jasiu Hub V4...",
-   LoadingSubtitle = "Oficjalna wersja V4 dla Arceus X",
+   LoadingSubtitle = "Oficjalna stabilna wersja",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
@@ -329,7 +329,6 @@ LocalPlayer.Idled:Connect(function()
     end
 end)
 
--- Auto Farm & Coin Aura
 task.spawn(function()
     while true do
         task.wait(0.3)
