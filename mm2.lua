@@ -1,406 +1,201 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Przesuwane Zakładki + Fake Tools w Troll)
-local CoreGui = game:GetService("CoreGui")
+-- Jasiu Hub V2 | Murder Mystery 2 (Wersja z profesjonalną biblioteką Rayfield)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Jasiu Hub V2 🌲 | MM2 Pro",
+   LoadingTitle = "Ładowanie Jasiu Hub V2...",
+   LoadingSubtitle = "Stworzone dla Arceus X",
+   ConfigurationSaving = {
+      Enabled = false,
+      FolderName = "JasiuHub",
+      FileName = "MM2Config"
+   },
+   KeySystem = false,
+})
+
+-- Zakładki
+local TabMurder = Window:CreateTab("Murder", 4483362458)
+local TabSheriff = Window:CreateTab("Sheriff", 4483362458)
+local TabPlayer = Window:CreateTab("Player", 4483362458)
+local TabEsp = Window:CreateTab("ESP", 4483362458)
+
+-- Serwisy i zmienne lokalne
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("JasiuHubV2") then
-    CoreGui.JasiuHubV2:Destroy()
-end
-
--- Zmienne
+_G.KillAuraOn = false
+_G.KillAuraRange = 10
 _G.SpeedVal = 16
 _G.JumpVal = 50
 _G.NoclipOn = false
 _G.InfJumpOn = false
 _G.FlyOn = false
-_G.FlySpeedVal = 50
-_G.KillAuraOn = false
-_G.KillAuraRangeVal = 10
+_G.FlySpeed = 50
 _G.EspRolesOn = false
 _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JasiuHubV2"
-ScreenGui.Parent = CoreGui
-
--- Główne okno
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 380, 0, 450)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -225)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
-
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
-UICorner.Parent = MainFrame
-
--- Pasek tytułowy
-local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 35)
-TitleBar.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
-TitleBar.BorderSizePixel = 0
-TitleBar.Parent = MainFrame
-
-local TitleText = Instance.new("TextLabel")
-TitleText.Size = UDim2.new(1, -70, 1, 0)
-TitleText.Position = UDim2.new(0, 12, 0, 0)
-TitleText.BackgroundTransparency = 1
-TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleText.TextSize = 15
-TitleText.Font = Enum.Font.SourceSansBold
-TitleText.TextXAlignment = Enum.TextXAlignment.Left
-TitleText.Text = "Jasiu Hub V2 🌲 | MM2 Pro"
-TitleText.Parent = TitleBar
-
--- Przycisk zwijania
-local MinimizeBtn = Instance.new("TextButton")
-MinimizeBtn.Size = UDim2.new(0, 28, 0, 28)
-MinimizeBtn.Position = UDim2.new(1, -64, 0, 3)
-MinimizeBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
-MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeBtn.Text = "-"
-MinimizeBtn.TextSize = 15
-MinimizeBtn.Font = Enum.Font.SourceSansBold
-MinimizeBtn.Parent = TitleBar
-local minC = Instance.new("UICorner") minC.CornerRadius = UDim.new(0, 5) minC.Parent = MinimizeBtn
-
--- Przycisk zamknięcia
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 28, 0, 28)
-CloseBtn.Position = UDim2.new(1, -32, 0, 3)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.Text = "X"
-CloseBtn.TextSize = 13
-CloseBtn.Parent = TitleBar
-local closeC = Instance.new("UICorner") closeC.CornerRadius = UDim.new(0, 5) closeC.Parent = CloseBtn
-
-CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-
--- Mała ikona
-local OpenIcon = Instance.new("TextButton")
-OpenIcon.Size = UDim2.new(0, 45, 0, 45)
-OpenIcon.Position = UDim2.new(0, 20, 0.2, 0)
-OpenIcon.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
-OpenIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenIcon.Text = "🌲 J"
-OpenIcon.TextSize = 14
-OpenIcon.Font = Enum.Font.SourceSansBold
-OpenIcon.Visible = false
-OpenIcon.Active = true
-OpenIcon.Draggable = true
-OpenIcon.Parent = ScreenGui
-local openC = Instance.new("UICorner") openC.CornerRadius = UDim.new(0, 8) openC.Parent = OpenIcon
-
-MinimizeBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-    OpenIcon.Visible = true
-end)
-
-OpenIcon.MouseButton1Click:Connect(function()
-    MainFrame.Visible = true
-    OpenIcon.Visible = false
-end)
-
--- Przesuwany pasek zakładek
-local TabBar = Instance.new("ScrollingFrame")
-TabBar.Size = UDim2.new(1, -10, 0, 34)
-TabBar.Position = UDim2.new(0, 5, 0, 40)
-TabBar.BackgroundTransparency = 1
-TabBar.CanvasSize = UDim2.new(0, 500, 0, 0)
-TabBar.ScrollBarThickness = 2
-TabBar.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 80)
-TabBar.Parent = MainFrame
-
-local TabList = Instance.new("UIListLayout")
-TabList.FillDirection = Enum.FillDirection.Horizontal
-TabList.HorizontalAlignment = Enum.HorizontalAlignment.Left
-TabList.Padding = UDim.new(0, 6)
-TabList.Parent = TabBar
-
-local Containers = {}
-local function createContainer(name)
-    local sc = Instance.new("ScrollingFrame")
-    sc.Size = UDim2.new(1, -16, 1, -85)
-    sc.Position = UDim2.new(0, 8, 0, 78)
-    sc.BackgroundTransparency = 1
-    sc.CanvasSize = UDim2.new(0, 0, 0, 500)
-    sc.ScrollBarThickness = 4
-    sc.Visible = false
-    sc.Parent = MainFrame
-    
-    local layout = Instance.new("UIListLayout")
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 8)
-    layout.Parent = sc
-    
-    Containers[name] = sc
-    return sc
-end
-
-local function createTabButton(name, targetContainer)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 80, 1, -4)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 13
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Text = name
-    btn.Parent = TabBar
-    
-    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 5) c.Parent = btn
-    
-    btn.MouseButton1Click:Connect(function()
-        for _, cont in pairs(Containers) do cont.Visible = false end
-        targetContainer.Visible = true
-    end)
-end
-
-local cMurder = createContainer("Murder")
-local cSheriff = createContainer("Sheriff")
-local cPlayer = createContainer("Player")
-local cEsp = createContainer("ESP")
-local cTroll = createContainer("Troll")
-
-createTabButton("Murder", cMurder)
-createTabButton("Sheriff", cSheriff)
-createTabButton("Player", cPlayer)
-createTabButton("ESP", cEsp)
-createTabButton("Troll", cTroll)
-
-cMurder.Visible = true
-
-local function addToggle(parent, name, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 38)
-    btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 13
-    btn.Font = Enum.Font.SourceSansSemibold
-    btn.Text = name .. ": WYŁĄCZONY"
-    btn.Parent = parent
-    
-    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = btn
-    
-    local state = false
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        callback(state)
-        if state then
-            btn.BackgroundColor3 = Color3.fromRGB(40, 180, 80)
-            btn.Text = name .. ": WŁĄCZONY"
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-            btn.Text = name .. ": WYŁĄCZONY"
-        end
-    end)
-end
-
-local function addSlider(parent, name, min, max, current, callback)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 55)
-    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    frame.Parent = parent
-    
-    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = frame
-    
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -10, 0, 25)
-    label.Position = UDim2.new(0, 5, 0, 2)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.TextSize = 13
-    label.Font = Enum.Font.SourceSansSemibold
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Text = name .. ": " .. current
-    label.Parent = frame
-    
-    local sliderBg = Instance.new("TextButton")
-    sliderBg.Size = UDim2.new(1, -20, 0, 15)
-    sliderBg.Position = UDim2.new(0, 10, 0, 30)
-    sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    sliderBg.Text = ""
-    sliderBg.Parent = frame
-    
-    local sc = Instance.new("UICorner") sc.CornerRadius = UDim.new(0, 4) sc.Parent = sliderBg
-    
-    local sliderFill = Instance.new("Frame")
-    sliderFill.Size = UDim2.new((current - min)/(max - min), 0, 1, 0)
-    sliderFill.BackgroundColor3 = Color3.fromRGB(0, 160, 80)
-    sliderFill.BorderSizePixel = 0
-    sliderFill.Parent = sliderBg
-    
-    local sfc = Instance.new("UICorner") sfc.CornerRadius = UDim.new(0, 4) sfc.Parent = sliderFill
-    
-    local dragging = false
-    sliderBg.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.MouseMovement) then
-            local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
-            sliderFill.Size = UDim2.new(pos, 0, 1, 0)
-            local val = math.floor(min + (max - min) * pos)
-            label.Text = name .. ": " .. val
-            callback(val)
-        end
-    end)
-end
-
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
 -------------------------------------------------
-addToggle(cMurder, "Kill Aura", function(v) _G.KillAuraOn = v end)
-addSlider(cMurder, "Zasięg Kill Aury", 10, 100, 10, function(v) _G.KillAuraRangeVal = v end)
+TabMurder:CreateToggle({
+   Name = "Kill Aura",
+   CurrentValue = false,
+   Flag = "KillAura",
+   Callback = function(Value)
+      _G.KillAuraOn = Value
+   end,
+})
 
-local btnKillAll = Instance.new("TextButton")
-btnKillAll.Size = UDim2.new(1, 0, 0, 40)
-btnKillAll.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-btnKillAll.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnKillAll.TextSize = 14
-btnKillAll.Font = Enum.Font.SourceSansBold
-btnKillAll.Text = "🔥 KILL ALL (Zabij wszystkich)"
-btnKillAll.Parent = cMurder
-local kac = Instance.new("UICorner") kac.CornerRadius = UDim.new(0, 6) kac.Parent = btnKillAll
+TabMurder:CreateSlider({
+   Name = "Zasięg Kill Aury",
+   Range = {10, 100},
+   Increment = 5,
+   Suffix = " studów",
+   CurrentValue = 10,
+   Flag = "KARange",
+   Callback = function(Value)
+      _G.KillAuraRange = Value
+   end,
+})
 
-btnKillAll.MouseButton1Click:Connect(function()
-    local knife = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife"))
-    if knife then
-        knife.Parent = LocalPlayer.Character
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-                pcall(function() knife:Activate() end)
-            end
-        end
-    end
-end)
+TabMurder:CreateButton({
+   Name = "🔥 KILL ALL (Zabij wszystkich)",
+   Callback = function()
+      local knife = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife"))
+      if knife then
+          knife.Parent = LocalPlayer.Character
+          for _, p in pairs(Players:GetPlayers()) do
+              if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
+                  pcall(function() knife:Activate() end)
+              end
+          end
+      end
+   end,
+})
 
 -------------------------------------------------
 -- ZAKŁADKA: SHERIFF
 -------------------------------------------------
-local btnGun = Instance.new("TextButton")
-btnGun.Size = UDim2.new(1, 0, 0, 40)
-btnGun.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
-btnGun.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnGun.TextSize = 13
-btnGun.Font = Enum.Font.SourceSansBold
-btnGun.Text = "Auto Teleport do upuszczonej broni"
-btnGun.Parent = cSheriff
-local gc = Instance.new("UICorner") gc.CornerRadius = UDim.new(0, 6) gc.Parent = btnGun
-btnGun.MouseButton1Click:Connect(function()
-    for _, v in pairs(Workspace:GetChildren()) do
-        if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
-            end
-        end
-    end
-end)
+TabSheriff:CreateButton({
+   Name = "Teleport do upuszczonej broni",
+   Callback = function()
+      for _, v in pairs(Workspace:GetChildren()) do
+          if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
+              if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+              end
+          end
+      end
+   end,
+})
 
 -------------------------------------------------
 -- ZAKŁADKA: PLAYER
 -------------------------------------------------
-addSlider(cPlayer, "Prędkość (WalkSpeed)", 1, 1000, 16, function(v)
-    _G.SpeedVal = v
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = v
-    end
-end)
+TabPlayer:CreateSlider({
+   Name = "Prędkość (WalkSpeed)",
+   Range = {16, 250},
+   Increment = 1,
+   Suffix = "",
+   CurrentValue = 16,
+   Flag = "WalkSpeed",
+   Callback = function(Value)
+      _G.SpeedVal = Value
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+          LocalPlayer.Character.Humanoid.WalkSpeed = Value
+      end
+   end,
+})
 
-addSlider(cPlayer, "Siła Skoku (JumpPower)", 1, 1000, 50, function(v)
-    _G.JumpVal = v
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.UseJumpPower = true
-        LocalPlayer.Character.Humanoid.JumpPower = v
-    end
-end)
+TabPlayer:CreateSlider({
+   Name = "Siła Skoku (JumpPower)",
+   Range = {50, 300},
+   Increment = 5,
+   Suffix = "",
+   CurrentValue = 50,
+   Flag = "JumpPower",
+   Callback = function(Value)
+      _G.JumpVal = Value
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+          LocalPlayer.Character.Humanoid.UseJumpPower = true
+          LocalPlayer.Character.Humanoid.JumpPower = Value
+      end
+   end,
+})
 
-addSlider(cPlayer, "Prędkość Fly", 1, 1000, 50, function(v) _G.FlySpeedVal = v end)
+TabPlayer:CreateToggle({
+   Name = "Noclip (Przenikanie przez ściany)",
+   CurrentValue = false,
+   Flag = "Noclip",
+   Callback = function(Value)
+      _G.NoclipOn = Value
+   end,
+})
 
-addToggle(cPlayer, "Noclip", function(v) _G.NoclipOn = v end)
-addToggle(cPlayer, "Infinite Jump", function(v) _G.InfJumpOn = v end)
-addToggle(cPlayer, "Fly (Latanie)", function(v) _G.FlyOn = v end)
+TabPlayer:CreateToggle({
+   Name = "Infinite Jump (Nieskończony skok)",
+   CurrentValue = false,
+   Flag = "InfJump",
+   Callback = function(Value)
+      _G.InfJumpOn = Value
+   end,
+})
+
+TabPlayer:CreateToggle({
+   Name = "Fly (Latanie)",
+   CurrentValue = false,
+   Flag = "Fly",
+   Callback = function(Value)
+      _G.FlyOn = Value
+   end,
+})
 
 -------------------------------------------------
 -- ZAKŁADKA: ESP
 -------------------------------------------------
-addToggle(cEsp, "ESP Ról (Kolory postaci)", function(v) _G.EspRolesOn = v end)
-addToggle(cEsp, "ESP Nazw i Ról nad głowami", function(v) _G.EspNamesOn = v end)
-addToggle(cEsp, "ESP Coinów (Monety)", function(v) _G.EspCoinsOn = v end)
-addToggle(cEsp, "ESP Trapów (Pułapki)", function(v) _G.EspTrapsOn = v end)
+TabEsp:CreateToggle({
+   Name = "ESP Ról (Kolory postaci)",
+   CurrentValue = false,
+   Flag = "EspRoles",
+   Callback = function(Value)
+      _G.EspRolesOn = Value
+   end,
+})
+
+TabEsp:CreateToggle({
+   Name = "ESP Nazw i Ról nad głowami",
+   CurrentValue = false,
+   Flag = "EspNames",
+   Callback = function(Value)
+      _G.EspNamesOn = Value
+   end,
+})
+
+TabEsp:CreateToggle({
+   Name = "ESP Coinów (Monety)",
+   CurrentValue = false,
+   Flag = "EspCoins",
+   Callback = function(Value)
+      _G.EspCoinsOn = Value
+   end,
+})
+
+TabEsp:CreateToggle({
+   Name = "ESP Trapów (Pułapki)",
+   CurrentValue = false,
+   Flag = "EspTraps",
+   Callback = function(Value)
+      _G.EspTrapsOn = Value
+   end,
+})
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Realistyczny Fake Ekwipunek)
--------------------------------------------------
-local function createFakeTool(name, toolType)
-    local tool = Instance.new("Tool")
-    tool.Name = name
-    tool.RequiresHandle = true
-    
-    local handle = Instance.new("Part")
-    handle.Name = "Handle"
-    handle.Size = Vector3.new(1, 1, 4)
-    handle.Transparency = 0
-    
-    if toolType == "Knife" then
-        handle.BrickColor = BrickColor.new("Really red")
-        handle.Material = Enum.Material.Metal
-    else
-        handle.BrickColor = BrickColor.new("Really black")
-        handle.Material = Enum.Material.SmoothPlastic
-    end
-    
-    handle.Parent = tool
-    tool.Parent = LocalPlayer.Backpack
-end
-
-local btnFakeKnife = Instance.new("TextButton")
-btnFakeKnife.Size = UDim2.new(1, 0, 0, 40)
-btnFakeKnife.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-btnFakeKnife.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnFakeKnife.TextSize = 13
-btnFakeKnife.Font = Enum.Font.SourceSansBold
-btnFakeKnife.Text = "🔪 Realistyczny Fake Nóż"
-btnFakeKnife.Parent = cTroll
-local fkc = Instance.new("UICorner") fkc.CornerRadius = UDim.new(0, 6) fkc.Parent = btnFakeKnife
-
-btnFakeKnife.MouseButton1Click:Connect(function()
-    createFakeTool("Knife (Fake)", "Knife")
-end)
-
-local btnFakeGun = Instance.new("TextButton")
-btnFakeGun.Size = UDim2.new(1, 0, 0, 40)
-btnFakeGun.BackgroundColor3 = Color3.fromRGB(0, 80, 180)
-btnFakeGun.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnFakeGun.TextSize = 13
-btnFakeGun.Font = Enum.Font.SourceSansBold
-btnFakeGun.Text = "🔫 Realistyczny Fake Pistolet"
-btnFakeGun.Parent = cTroll
-local fgc = Instance.new("UICorner") fgc.CornerRadius = UDim.new(0, 6) fgc.Parent = btnFakeGun
-
-btnFakeGun.MouseButton1Click:Connect(function()
-    createFakeTool("Gun (Fake)", "Gun")
-end)
-
--------------------------------------------------
--- PĘTLE DZIAŁAJĄCE W TLE
+-- GŁÓWNE PĘTLE W TLE
 -------------------------------------------------
 RunService.Stepped:Connect(function()
     if _G.NoclipOn and LocalPlayer.Character then
@@ -415,7 +210,7 @@ RunService.Stepped:Connect(function()
         if knife then
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    if (myRoot.Position - p.Character.HumanoidRootPart.Position).Magnitude <= _G.KillAuraRangeVal then
+                    if (myRoot.Position - p.Character.HumanoidRootPart.Position).Magnitude <= _G.KillAuraRange then
                         knife.Parent = LocalPlayer.Character
                         pcall(function() knife:Activate() end)
                     end
@@ -490,6 +285,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- ESP Coinów
     if _G.EspCoinsOn then
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "CoinContainer" or v.Name == "Coin" then
@@ -507,9 +303,10 @@ RunService.Stepped:Connect(function()
         end
     end
     
+    -- ESP Trapów
     if _G.EspTrapsOn then
         for _, v in pairs(Workspace:GetDescendants()) do
-            if v.Name == "Trap" or v.Name:lower():find("trap") then
+            if v.Name == "Trap" or (v.Name and string.lower(v.Name):find("trap")) then
                 if not v:FindFirstChild("TrapHighlight") then
                     local th = Instance.new("Highlight")
                     th.Name = "TrapHighlight"
@@ -525,7 +322,26 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-UserInputService.JumpRequest:Connect(function()
+game:GetService("UserInputService").JumpRequest:Connect(function()
     if _G.InfJumpOn then
         local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
-        if hum th
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+local camera = Workspace.CurrentCamera
+RunService.RenderStepped:Connect(function()
+    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        local rootPart = LocalPlayer.Character.HumanoidRootPart
+        local humanoid = LocalPlayer.Character.Humanoid
+        humanoid.PlatformStand = true
+        local moveDirection = humanoid.MoveDirection
+        local velocity = Vector3.new(0, 0, 0)
+        if moveDirection.Magnitude > 0 then
+            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
+        end
+        rootPart.Velocity = velocity
+    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.PlatformStand = false
+    end
+end)
