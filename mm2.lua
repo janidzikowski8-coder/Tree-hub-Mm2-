@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Zakładka Troll z Fake Narzędziami)
+-- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Realistyczny Fake Nóż z gry)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -24,6 +24,7 @@ local TabTroll = Window:CreateTab("Troll", 4483362458)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
 _G.KillAuraOn = false
@@ -196,41 +197,27 @@ TabEsp:CreateToggle({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Fake Narzędzia do zmyłki)
+-- ZAKŁADKA: TROLL (Prawdziwy wizualny model z gry)
 -------------------------------------------------
-local function createFakeTool(name, toolType)
-    local tool = Instance.new("Tool")
-    tool.Name = name
-    tool.RequiresHandle = true
-    
-    local handle = Instance.new("Part")
-    handle.Name = "Handle"
-    handle.Size = Vector3.new(1, 1, 4)
-    handle.Transparency = 0
-    
-    if toolType == "Knife" then
-        handle.BrickColor = BrickColor.new("Really red")
-        handle.Material = Enum.Material.Metal
-    else
-        handle.BrickColor = BrickColor.new("Really black")
-        handle.Material = Enum.Material.SmoothPlastic
-    end
-    
-    handle.Parent = tool
-    tool.Parent = LocalPlayer.Backpack
-end
-
 TabTroll:CreateButton({
-   Name = "🔪 Weź Realistyczny Fake Nóż",
+   Name = "🔪 Weź Prawdziwy Model Noża (Zmyłka)",
    Callback = function()
-      createFakeTool("Knife (Fake)", "Knife")
+      pcall(function()
+          -- Pobiera oryginalny model noża z gry
+          local realKnife = ReplicatedStorage.Items.Knife:Clone()
+          realKnife.Parent = LocalPlayer.Backpack
+      end)
    end,
 })
 
 TabTroll:CreateButton({
-   Name = "🔫 Weź Realistyczny Fake Pistolet",
+   Name = "🔫 Weź Prawdziwy Model Pistoletu (Zmyłka)",
    Callback = function()
-      createFakeTool("Gun (Fake)", "Gun")
+      pcall(function()
+          -- Pobiera oryginalny model pistoletu z gry
+          local realGun = ReplicatedStorage.Items.Gun:Clone()
+          realGun.Parent = LocalPlayer.Backpack
+      end)
    end,
 })
 
