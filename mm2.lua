@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Prawdziwa Niewidzialność + ESP + Troll)
+-- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + ESP + Skok-Zmyłka)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -34,8 +34,6 @@ _G.NoclipOn = false
 _G.InfJumpOn = false
 _G.FlyOn = false
 _G.FlySpeed = 50
-_G.InvisibilityOn = false
-_G.FreezeAllOn = false
 _G.EspRolesOn = false
 _G.EspCoinsOn = false
 _G.EspTrapsOn = false
@@ -159,41 +157,6 @@ TabPlayer:CreateToggle({
    end,
 })
 
-TabPlayer:CreateToggle({
-   Name = "Prawdziwa Niewidzialność (Server Invisible)",
-   CurrentValue = false,
-   Flag = "Invisible",
-   Callback = function(Value)
-      _G.InvisibilityOn = Value
-      pcall(function()
-          local char = LocalPlayer.Character
-          if char then
-              if Value then
-                  -- Przeniesienie postaci do podziemi / usunięcie części z replikacji
-                  if char:FindFirstChild("HumanoidRootPart") then
-                      local oldPos = char.HumanoidRootPart.CFrame
-                      -- Tworzenie klona architektonicznego do zachowania pozycji kamery
-                      local clone = char:Clone()
-                      clone.Name = "ClientGhost"
-                      clone.Parent = Workspace
-                      for _, pt in pairs(clone:GetDescendants()) do
-                          if pt:IsA("BasePart") then pt.Anchored = true pt.Transparency = 0.5 end
-                      end
-                      char.HumanoidRootPart.CFrame = CFrame.new(0, -9999, 0)
-                  end
-              else
-                  -- Przywrócenie postaci
-                  local ghost = Workspace:FindFirstChild("ClientGhost")
-                  if ghost and char:FindFirstChild("HumanoidRootPart") then
-                      char.HumanoidRootPart.CFrame = ghost.HumanoidRootPart.CFrame
-                      ghost:Destroy()
-                  end
-              end
-          end
-      end)
-   end,
-})
-
 -------------------------------------------------
 -- ZAKŁADKA: ESP
 -------------------------------------------------
@@ -243,52 +206,15 @@ TabEsp:CreateToggle({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Freeze All + Animacje)
+-- ZAKŁADKA: TROLL (Skok-Zmyłka)
 -------------------------------------------------
-TabTroll:CreateToggle({
-   Name = "Freeze All (Zamroź wszystkich na serwerze)",
-   CurrentValue = false,
-   Flag = "FreezeAll",
-   Callback = function(Value)
-      _G.FreezeAllOn = Value
-      if not Value then
-          for _, p in pairs(Players:GetPlayers()) do
-              if p ~= LocalPlayer and p.Character then
-                  local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                  local root = p.Character:FindFirstChild("HumanoidRootPart")
-                  if hum then hum.WalkSpeed = 16 end
-                  if root then root.Anchored = false end
-              end
-          end
-      end
-   end,
-})
-
 TabTroll:CreateButton({
-   Name = "🎬 Animacja Zabicia (Troll)",
+   Name = "🌀 Skok-Zmyłka (Teleportuj się 15 studów w górę)",
    Callback = function()
       pcall(function()
-          local char = LocalPlayer.Character
-          if char and char:FindFirstChildOfClass("Humanoid") then
-              local anim = Instance.new("Animation")
-              anim.AnimationId = "rbxassetid://184570534"
-              local track = char.Humanoid:LoadAnimation(anim)
-              track:Play()
-          end
-      end)
-   end,
-})
-
-TabTroll:CreateButton({
-   Name = "🛌 Animacja Leżenia (Troll)",
-   Callback = function()
-      pcall(function()
-          local char = LocalPlayer.Character
-          if char and char:FindFirstChildOfClass("Humanoid") then
-              local anim = Instance.new("Animation")
-              anim.AnimationId = "rbxassetid://282574440"
-              local track = char.Humanoid:LoadAnimation(anim)
-              track:Play()
+          local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+          if root then
+              root.CFrame = root.CFrame + Vector3.new(0, 15, 0)
           end
       end)
    end,
@@ -301,17 +227,6 @@ RunService.Stepped:Connect(function()
     if _G.NoclipOn and LocalPlayer.Character then
         for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
             if v:IsA("BasePart") then v.CanCollide = false end
-        end
-    end
-    
-    if _G.FreezeAllOn then
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                local root = p.Character:FindFirstChild("HumanoidRootPart")
-                if hum then hum.WalkSpeed = 0 end
-                if root then root.Anchored = true end
-            end
         end
     end
     
