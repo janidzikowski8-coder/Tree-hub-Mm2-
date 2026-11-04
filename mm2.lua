@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Wersja z profesjonalną biblioteką Rayfield)
+-- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Zakładka Troll z Fake Narzędziami)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -18,6 +18,7 @@ local TabMurder = Window:CreateTab("Murder", 4483362458)
 local TabSheriff = Window:CreateTab("Sheriff", 4483362458)
 local TabPlayer = Window:CreateTab("Player", 4483362458)
 local TabEsp = Window:CreateTab("ESP", 4483362458)
+local TabTroll = Window:CreateTab("Troll", 4483362458)
 
 -- Serwisy i zmienne lokalne
 local Players = game:GetService("Players")
@@ -191,6 +192,45 @@ TabEsp:CreateToggle({
    Flag = "EspTraps",
    Callback = function(Value)
       _G.EspTrapsOn = Value
+   end,
+})
+
+-------------------------------------------------
+-- ZAKŁADKA: TROLL (Fake Narzędzia do zmyłki)
+-------------------------------------------------
+local function createFakeTool(name, toolType)
+    local tool = Instance.new("Tool")
+    tool.Name = name
+    tool.RequiresHandle = true
+    
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(1, 1, 4)
+    handle.Transparency = 0
+    
+    if toolType == "Knife" then
+        handle.BrickColor = BrickColor.new("Really red")
+        handle.Material = Enum.Material.Metal
+    else
+        handle.BrickColor = BrickColor.new("Really black")
+        handle.Material = Enum.Material.SmoothPlastic
+    end
+    
+    handle.Parent = tool
+    tool.Parent = LocalPlayer.Backpack
+end
+
+TabTroll:CreateButton({
+   Name = "🔪 Weź Realistyczny Fake Nóż",
+   Callback = function()
+      createFakeTool("Knife (Fake)", "Knife")
+   end,
+})
+
+TabTroll:CreateButton({
+   Name = "🔫 Weź Realistyczny Fake Pistolet",
+   Callback = function()
+      createFakeTool("Gun (Fake)", "Gun")
    end,
 })
 
