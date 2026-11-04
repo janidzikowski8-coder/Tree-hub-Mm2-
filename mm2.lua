@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Realistyczny Fake Nóż z gry)
+-- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + ESP Dropped Gun + Prawdziwe Freeze & Animacje + Ultra Invisible)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -24,7 +24,6 @@ local TabTroll = Window:CreateTab("Troll", 4483362458)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
 _G.KillAuraOn = false
@@ -35,10 +34,13 @@ _G.NoclipOn = false
 _G.InfJumpOn = false
 _G.FlyOn = false
 _G.FlySpeed = 50
+_G.InvisibilityOn = false
+_G.FreezeAllOn = false
 _G.EspRolesOn = false
 _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
+_G.EspGunDropOn = false
 
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
@@ -157,6 +159,24 @@ TabPlayer:CreateToggle({
    end,
 })
 
+TabPlayer:CreateToggle({
+   Name = "Niewidzialność (Ultra Invisible - nic nie widać)",
+   CurrentValue = false,
+   Flag = "Invisible",
+   Callback = function(Value)
+      _G.InvisibilityOn = Value
+      if not Value and LocalPlayer.Character then
+          for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+              if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                  part.Transparency = 0
+              elseif part:IsA("Decal") then
+                  part.Transparency = 0
+              end
+          end
+      end
+   end,
+})
+
 -------------------------------------------------
 -- ZAKŁADKA: ESP
 -------------------------------------------------
@@ -196,27 +216,63 @@ TabEsp:CreateToggle({
    end,
 })
 
+TabEsp:CreateToggle({
+   Name = "ESP Dropped Gun (Widoczność leżącej broni)",
+   CurrentValue = false,
+   Flag = "EspGunDrop",
+   Callback = function(Value)
+      _G.EspGunDropOn = Value
+   end,
+})
+
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Prawdziwy wizualny model z gry)
+-- ZAKŁADKA: TROLL (Freeze All + Animacje)
 -------------------------------------------------
+TabTroll:CreateToggle({
+   Name = "Freeze All (Zamroź wszystkich na serwerze)",
+   CurrentValue = false,
+   Flag = "FreezeAll",
+   Callback = function(Value)
+      _G.FreezeAllOn = Value
+      if not Value then
+          for _, p in pairs(Players:GetPlayers()) do
+              if p ~= LocalPlayer and p.Character then
+                  local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                  local root = p.Character:FindFirstChild("HumanoidRootPart")
+                  if hum then hum.WalkSpeed = 16 end
+                  if root then root.Anchored = false end
+              end
+          end
+      end
+   end,
+})
+
 TabTroll:CreateButton({
-   Name = "🔪 Weź Prawdziwy Model Noża (Zmyłka)",
+   Name = "🎬 Animacja Zabicia (Troll)",
    Callback = function()
       pcall(function()
-          -- Pobiera oryginalny model noża z gry
-          local realKnife = ReplicatedStorage.Items.Knife:Clone()
-          realKnife.Parent = LocalPlayer.Backpack
+          local char = LocalPlayer.Character
+          if char and char:FindFirstChildOfClass("Humanoid") then
+              local anim = Instance.new("Animation")
+              anim.AnimationId = "rbxassetid://184570534" -- Animacja ciosu/ataku
+              local track = char.Humanoid:LoadAnimation(anim)
+              track:Play()
+          end
       end)
    end,
 })
 
 TabTroll:CreateButton({
-   Name = "🔫 Weź Prawdziwy Model Pistoletu (Zmyłka)",
+   Name = "🛌 Animacja Leżenia (Troll)",
    Callback = function()
       pcall(function()
-          -- Pobiera oryginalny model pistoletu z gry
-          local realGun = ReplicatedStorage.Items.Gun:Clone()
-          realGun.Parent = LocalPlayer.Backpack
+          local char = LocalPlayer.Character
+          if char and char:FindFirstChildOfClass("Humanoid") then
+              local anim = Instance.new("Animation")
+              anim.AnimationId = "rbxassetid://282574440" -- Animacja upadku/leżenia
+              local track = char.Humanoid:LoadAnimation(anim)
+              track:Play()
+          end
       end)
    end,
 })
@@ -228,6 +284,27 @@ RunService.Stepped:Connect(function()
     if _G.NoclipOn and LocalPlayer.Character then
         for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
             if v:IsA("BasePart") then v.CanCollide = false end
+        end
+    end
+    
+    if _G.InvisibilityOn and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Transparency = 1
+            elseif part:IsA("Decal") then
+                part.Transparency = 1
+            end
+        end
+    end
+    
+    if _G.FreezeAllOn then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                local root = p.Character:FindFirstChild("HumanoidRootPart")
+                if hum then hum.WalkSpeed = 0 end
+                if root then root.Anchored = true end
+            end
         end
     end
     
@@ -345,6 +422,26 @@ RunService.Stepped:Connect(function()
     else
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "TrapHighlight" then v:Destroy() end
+        end
+    end
+
+    -- ESP Dropped Gun (Leżąca broń)
+    if _G.EspGunDropOn then
+        for _, v in pairs(Workspace:GetChildren()) do
+            if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
+                if not v:FindFirstChild("GunHighlight") then
+                    local gh = Instance.new("Highlight")
+                    gh.Name = "GunHighlight"
+                    gh.FillColor = Color3.fromRGB(0, 150, 255)
+                    gh.Parent = v
+                end
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetChildren()) do
+            if v:FindFirstChild("GunHighlight") then
+                v.GunHighlight:Destroy()
+            end
         end
     end
 end)
