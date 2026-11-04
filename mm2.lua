@@ -1,29 +1,30 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Lista Graczy + Najmocniejszy Freeze Pro)
+-- Jasiu Hub V3 | Murder Mystery 2 (Rayfield + Auto Farm + Silent Aim + Anti-AFK)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Jasiu Hub V2 🌲 | MM2 Pro",
-   LoadingTitle = "Ładowanie Jasiu Hub V2...",
-   LoadingSubtitle = "Stworzone dla Arceus X",
-   ConfigurationSaving = {
-      Enabled = false,
-      FolderName = "JasiuHub",
-      FileName = "MM2Config"
-   },
+   Name = "Jasiu Hub V3 🌲 | MM2 Ultimate",
+   LoadingTitle = "Ładowanie Jasiu Hub V3...",
+   LoadingSubtitle = "Dedykowane dla Arceus X",
+   ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
 
 -- Zakładki
 local TabMurder = Window:CreateTab("Murder", 4483362458)
 local TabSheriff = Window:CreateTab("Sheriff", 4483362458)
+local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
 local TabPlayer = Window:CreateTab("Player", 4483362458)
 local TabEsp = Window:CreateTab("ESP", 4483362458)
+local TabUtility = Window:CreateTab("Utility", 4483362458)
 local TabTroll = Window:CreateTab("Troll", 4483362458)
 
--- Serwisy i zmienne lokalne
+-- Serwisy i Zmienne
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local TeleportService = game:GetService("TeleportService")
+local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
 
 _G.KillAuraOn = false
@@ -39,14 +40,16 @@ _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
 _G.EspGunDropOn = false
-_G.SelectedFreezeTarget = ""
-_G.TargetFrozen = false
+_G.AutoShootSheriff = false
+_G.AutoFarmCoins = false
+_G.CrosshairOn = false
+_G.AntiAfkOn = true
 
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
 -------------------------------------------------
 TabMurder:CreateToggle({
-   Name = "⚡ Ultra Kill Aura",
+   Name = "⚡ Ultra Kill Aura Pro",
    CurrentValue = false,
    Flag = "KillAura",
    Callback = function(Value) _G.KillAuraOn = Value end,
@@ -81,6 +84,13 @@ TabMurder:CreateButton({
 -------------------------------------------------
 -- ZAKŁADKA: SHERIFF
 -------------------------------------------------
+TabSheriff:CreateToggle({
+   Name = "🎯 Auto-Shoot / Silent Aim (Strzał w Murderera)",
+   CurrentValue = false,
+   Flag = "AutoShoot",
+   Callback = function(Value) _G.AutoShootSheriff = Value end,
+})
+
 TabSheriff:CreateButton({
    Name = "Teleport do upuszczonej broni",
    Callback = function()
@@ -92,6 +102,16 @@ TabSheriff:CreateButton({
           end
       end
    end,
+})
+
+-------------------------------------------------
+-- ZAKŁADKA: AUTO FARM
+-------------------------------------------------
+TabFarm:CreateToggle({
+   Name = "🪙 Auto-Farm Monet (Teleport do Coinów)",
+   CurrentValue = false,
+   Flag = "AutoFarm",
+   Callback = function(Value) _G.AutoFarmCoins = Value end,
 })
 
 -------------------------------------------------
@@ -188,55 +208,61 @@ TabEsp:CreateToggle({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Lista graczy + Najmocniejszy Freeze)
+-- ZAKŁADKA: UTILITY & VISUAL
 -------------------------------------------------
-local playerNamesList = {}
-for _, p in pairs(Players:GetPlayers()) do
-    if p ~= LocalPlayer then table.insert(playerNamesList, p.Name) end
-end
-
-Players.PlayerAdded:Connect(function(p)
-    if p ~= LocalPlayer then table.insert(playerNamesList, p.Name) end
-end)
-
-Players.PlayerRemoving:Connect(function(p)
-    for i, name in ipairs(playerNamesList) do
-        if name == p.Name then table.remove(playerNamesList, i) end
-    end
-end)
-
-TabTroll:CreateDropdown({
-   Name = "Wybierz gracza do zamrożenia",
-   Options = playerNamesList,
-   CurrentOption = "",
-   Flag = "FreezeTarget",
-   Callback = function(Option)
-      _G.SelectedFreezeTarget = Option
-   end,
-})
-
-TabTroll:CreateToggle({
-   Name = "🧊 Ulepszony Masakryczny Freeze (Paraliż)",
+local crosshairGui = nil
+TabUtility:CreateToggle({
+   Name = "🎯 Customowy Celownik (Crosshair)",
    CurrentValue = false,
-   Flag = "SuperFreezeToggle",
+   Flag = "CrosshairToggle",
    Callback = function(Value)
-      _G.TargetFrozen = Value
-      if not Value and _G.SelectedFreezeTarget ~= "" then
-          local target = Players:FindFirstChild(_G.SelectedFreezeTarget)
-          if target and target.Character then
-              local hum = target.Character:FindFirstChildOfClass("Humanoid")
-              local root = target.Character:FindFirstChild("HumanoidRootPart")
-              if hum then 
-                  hum.WalkSpeed = 16 
-                  hum.JumpPower = 50
-                  hum.PlatformStand = false
-              end
-              if root then root.Anchored = false end
+      _G.CrosshairOn = Value
+      if Value then
+          if not crosshairGui then
+              crosshairGui = Instance.new("ScreenGui")
+              crosshairGui.Name = "JasiuCrosshair"
+              crosshairGui.Parent = CoreGui
+              
+              local dot = Instance.new("Frame")
+              dot.Size = UDim2.new(0, 6, 0, 6)
+              dot.Position = UDim2.new(0.5, -3, 0.5, -3)
+              dot.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+              dot.BorderSizePixel = 0
+              dot.Parent = crosshairGui
+          end
+      else
+          if crosshairGui then
+              crosshairGui:Destroy()
+              crosshairGui = nil
           end
       end
    end,
 })
 
+TabUtility:CreateToggle({
+   Name = "🛡️ Anti-AFK (Ochrona przed AFK Kick)",
+   CurrentValue = true,
+   Flag = "AntiAfkToggle",
+   Callback = function(Value) _G.AntiAfkOn = Value end,
+})
+
+TabUtility:CreateButton({
+   Name = "🔄 Server Hop (Zmień serwer)",
+   Callback = function()
+      TeleportService:Teleport(game.PlaceId, LocalPlayer)
+   end,
+})
+
+TabUtility:CreateButton({
+   Name = "🔁 Rejoin (Dołącz ponownie do tego samego serwera)",
+   Callback = function()
+      TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+   end,
+})
+
+-------------------------------------------------
+-- ZAKŁADKA: TROLL
+-------------------------------------------------
 TabTroll:CreateButton({
    Name = "🌀 Skok-Zmyłka (Teleportuj się 15 studów w górę)",
    Callback = function()
@@ -252,6 +278,32 @@ TabTroll:CreateButton({
 -------------------------------------------------
 -- GŁÓWNE PĘTLE W TLE
 -------------------------------------------------
+-- Anti-AFK
+LocalPlayer.Idled:Connect(function()
+    if _G.AntiAfkOn then
+        VirtualUser:Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        VirtualUser:Button2Up(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
+    end
+end)
+
+-- Auto Farm Coinów w tle
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        if _G.AutoFarmCoins and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v.Name == "CoinContainer" or v.Name == "Coin" then
+                    if v:IsA("BasePart") then
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+                        task.wait(0.2)
+                    end
+                end
+            end
+        end
+    end
+end)
+
 RunService.Stepped:Connect(function()
     if _G.NoclipOn and LocalPlayer.Character then
         for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
@@ -259,23 +311,7 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Najmocniejszy Freeze wybranego gracza w pętli
-    if _G.TargetFrozen and _G.SelectedFreezeTarget ~= "" then
-        local target = Players:FindFirstChild(_G.SelectedFreezeTarget)
-        if target and target.Character then
-            local hum = target.Character:FindFirstChildOfClass("Humanoid")
-            local root = target.Character:FindFirstChild("HumanoidRootPart")
-            if hum then
-                hum.WalkSpeed = 0
-                hum.JumpPower = 0
-                hum.PlatformStand = true
-            end
-            if root then
-                root.Anchored = true
-            end
-        end
-    end
-    
+    -- Ultra Kill Aura Pro
     if _G.KillAuraOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local myRoot = LocalPlayer.Character.HumanoidRootPart
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
@@ -290,9 +326,24 @@ RunService.Stepped:Connect(function()
                         if knife.Parent ~= LocalPlayer.Character then
                             knife.Parent = LocalPlayer.Character
                         end
-                        pcall(function()
-                            knife:Activate()
-                        end)
+                        pcall(function() knife:Activate() end)
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Auto-Shoot Sheriff (Celowanie w Murderera)
+    if _G.AutoShootSheriff and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local gun = LocalPlayer.Character:FindFirstChild("Gun") or LocalPlayer.Backpack:FindFirstChild("Gun") or LocalPlayer.Character:FindFirstChild("Revolver") or LocalPlayer.Backpack:FindFirstChild("Revolver")
+        if gun then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    local isMurderer = p.Character:FindFirstChild("Knife") or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
+                    if isMurderer then
+                        gun.Parent = LocalPlayer.Character
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position, p.Character.HumanoidRootPart.Position)
+                        pcall(function() gun:Activate() end)
                     end
                 end
             end
