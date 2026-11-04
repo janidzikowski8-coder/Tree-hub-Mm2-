@@ -1,15 +1,11 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + ESP Dropped Gun + Prawdziwe Freeze & Animacje + Ultra Invisible)
+-- Jasiu Hub V2 | MM2 Mobile (Rayfield + Piękna podążająca kula Vortex)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Jasiu Hub V2 🌲 | MM2 Pro",
    LoadingTitle = "Ładowanie Jasiu Hub V2...",
    LoadingSubtitle = "Stworzone dla Arceus X",
-   ConfigurationSaving = {
-      Enabled = false,
-      FolderName = "JasiuHub",
-      FileName = "MM2Config"
-   },
+   ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
 
@@ -19,11 +15,13 @@ local TabSheriff = Window:CreateTab("Sheriff", 4483362458)
 local TabPlayer = Window:CreateTab("Player", 4483362458)
 local TabEsp = Window:CreateTab("ESP", 4483362458)
 local TabTroll = Window:CreateTab("Troll", 4483362458)
+local TabVisual = Window:CreateTab("Visual", 4483362458)
 
--- Serwisy i zmienne lokalne
+-- Serwisy
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
 _G.KillAuraOn = false
@@ -35,12 +33,12 @@ _G.InfJumpOn = false
 _G.FlyOn = false
 _G.FlySpeed = 50
 _G.InvisibilityOn = false
-_G.FreezeAllOn = false
 _G.EspRolesOn = false
 _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
 _G.EspGunDropOn = false
+_G.VortexActive = false
 
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
@@ -49,9 +47,7 @@ TabMurder:CreateToggle({
    Name = "Kill Aura",
    CurrentValue = false,
    Flag = "KillAura",
-   Callback = function(Value)
-      _G.KillAuraOn = Value
-   end,
+   Callback = function(Value) _G.KillAuraOn = Value end,
 })
 
 TabMurder:CreateSlider({
@@ -61,9 +57,7 @@ TabMurder:CreateSlider({
    Suffix = " studów",
    CurrentValue = 10,
    Flag = "KARange",
-   Callback = function(Value)
-      _G.KillAuraRange = Value
-   end,
+   Callback = function(Value) _G.KillAuraRange = Value end,
 })
 
 TabMurder:CreateButton({
@@ -136,27 +130,21 @@ TabPlayer:CreateToggle({
    Name = "Noclip (Przenikanie przez ściany)",
    CurrentValue = false,
    Flag = "Noclip",
-   Callback = function(Value)
-      _G.NoclipOn = Value
-   end,
+   Callback = function(Value) _G.NoclipOn = Value end,
 })
 
 TabPlayer:CreateToggle({
    Name = "Infinite Jump (Nieskończony skok)",
    CurrentValue = false,
    Flag = "InfJump",
-   Callback = function(Value)
-      _G.InfJumpOn = Value
-   end,
+   Callback = function(Value) _G.InfJumpOn = Value end,
 })
 
 TabPlayer:CreateToggle({
    Name = "Fly (Latanie)",
    CurrentValue = false,
    Flag = "Fly",
-   Callback = function(Value)
-      _G.FlyOn = Value
-   end,
+   Callback = function(Value) _G.FlyOn = Value end,
 })
 
 TabPlayer:CreateToggle({
@@ -184,96 +172,215 @@ TabEsp:CreateToggle({
    Name = "ESP Ról (Kolory postaci)",
    CurrentValue = false,
    Flag = "EspRoles",
-   Callback = function(Value)
-      _G.EspRolesOn = Value
-   end,
+   Callback = function(Value) _G.EspRolesOn = Value end,
 })
 
 TabEsp:CreateToggle({
    Name = "ESP Nazw i Ról nad głowami",
    CurrentValue = false,
    Flag = "EspNames",
-   Callback = function(Value)
-      _G.EspNamesOn = Value
-   end,
+   Callback = function(Value) _G.EspNamesOn = Value end,
 })
 
 TabEsp:CreateToggle({
    Name = "ESP Coinów (Monety)",
    CurrentValue = false,
    Flag = "EspCoins",
-   Callback = function(Value)
-      _G.EspCoinsOn = Value
-   end,
+   Callback = function(Value) _G.EspCoinsOn = Value end,
 })
 
 TabEsp:CreateToggle({
    Name = "ESP Trapów (Pułapki)",
    CurrentValue = false,
    Flag = "EspTraps",
-   Callback = function(Value)
-      _G.EspTrapsOn = Value
-   end,
+   Callback = function(Value) _G.EspTrapsOn = Value end,
 })
 
 TabEsp:CreateToggle({
-   Name = "ESP Dropped Gun (Widoczność leżącej broni)",
+   Name = "ESP Dropped Gun (Leżąca broń)",
    CurrentValue = false,
    Flag = "EspGunDrop",
-   Callback = function(Value)
-      _G.EspGunDropOn = Value
-   end,
+   Callback = function(Value) _G.EspGunDropOn = Value end,
 })
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Freeze All + Animacje)
+-- ZAKŁADKA: TROLL (Piękny Vortex Podążający za Tobą)
 -------------------------------------------------
+local vortexOrb = nil
+
 TabTroll:CreateToggle({
-   Name = "Freeze All (Zamroź wszystkich na serwerze)",
+   Name = "🌀 Piękny Vortex Spawner (Chodzi za Tobą)",
    CurrentValue = false,
-   Flag = "FreezeAll",
+   Flag = "VortexToggle",
    Callback = function(Value)
-      _G.FreezeAllOn = Value
-      if not Value then
-          for _, p in pairs(Players:GetPlayers()) do
-              if p ~= LocalPlayer and p.Character then
-                  local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                  local root = p.Character:FindFirstChild("HumanoidRootPart")
-                  if hum then hum.WalkSpeed = 16 end
-                  if root then root.Anchored = false end
-              end
+      _G.VortexActive = Value
+      if Value then
+          -- Tworzenie pięknej, świecącej, pulsującej kuli
+          if not vortexOrb and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+              vortexOrb = Instance.new("Part")
+              vortexOrb.Shape = Enum.PartType.Ball
+              vortexOrb.Size = Vector3.new(5, 5, 5)
+              vortexOrb.BrickColor = BrickColor.new("Cyan")
+              vortexOrb.Material = Enum.Material.Neon
+              vortexOrb.CanCollide = false
+              vortexOrb.Anchored = true
+              
+              -- Dodanie świecącego efektu (Highlight/Particle)
+              local fire = Instance.new("Fire")
+              fire.Size = 6
+              fire.Heat = 5
+              fire.Color = Color3.fromRGB(0, 200, 255)
+              fire.SecondaryColor = Color3.fromRGB(255, 0, 255)
+              fire.Parent = vortexOrb
+              
+              vortexOrb.Parent = Workspace
+          end
+      else
+          if vortexOrb then
+              vortexOrb:Destroy()
+              vortexOrb = nil
           end
       end
    end,
 })
 
-TabTroll:CreateButton({
-   Name = "🎬 Animacja Zabicia (Troll)",
+-------------------------------------------------
+-- ZAKŁADKA: VISUAL
+-------------------------------------------------
+TabVisual:CreateButton({
+   Name = "💀 Fake Headless (Usunięcie głowy)",
    Callback = function()
-      pcall(function()
-          local char = LocalPlayer.Character
-          if char and char:FindFirstChildOfClass("Humanoid") then
-              local anim = Instance.new("Animation")
-              anim.AnimationId = "rbxassetid://184570534" -- Animacja ciosu/ataku
-              local track = char.Humanoid:LoadAnimation(anim)
-              track:Play()
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
+          LocalPlayer.Character.Head.Transparency = 1
+          if LocalPlayer.Character.Head:FindFirstChildOfClass("Decal") then
+              LocalPlayer.Character.Head:FindFirstChildOfClass("Decal").Transparency = 1
           end
-      end)
+      end
    end,
 })
 
-TabTroll:CreateButton({
-   Name = "🛌 Animacja Leżenia (Troll)",
+TabVisual:CreateButton({
+   Name = "🦵 Fake Korblox Right Leg",
    Callback = function()
-      pcall(function()
-          local char = LocalPlayer.Character
-          if char and char:FindFirstChildOfClass("Humanoid") then
-              local anim = Instance.new("Animation")
-              anim.AnimationId = "rbxassetid://282574440" -- Animacja upadku/leżenia
-              local track = char.Humanoid:LoadAnimation(anim)
-              track:Play()
+      if LocalPlayer.Character then
+          local leg = LocalPlayer.Character:FindFirstChild("RightLowerLeg") or LocalPlayer.Character:FindFirstChild("Right Leg")
+          if leg then
+              leg.MeshId = "rbxassetid://902942093"
+              leg.Transparency = 0
           end
-      end)
+      end
+   end,
+})
+
+TabVisual:CreateDropdown({
+   Name = "🎨 10 Efektów Shader / Style",
+   Options = {"Domyślny", "Cyberpunk", "Sunset Vibes", "Golden Hour", "RTX Glow", "Neon City", "Dark Fantasy", "Pastel World", "Soft Bloom", "Cinema Dramatic"},
+   CurrentOption = "Domyślny",
+   Flag = "ShadersDropdown",
+   Callback = function(Option)
+      Lighting.ClockTime = 14
+      Lighting.Brightness = 2
+      Lighting.FogEnd = 100000
+      
+      if Option == "Cyberpunk" then
+          Lighting.Ambient = Color3.fromRGB(255, 0, 150)
+          Lighting.OutdoorAmbient = Color3.fromRGB(0, 255, 255)
+      elseif Option == "Sunset Vibes" then
+          Lighting.ClockTime = 18
+          Lighting.Ambient = Color3.fromRGB(255, 100, 50)
+      elseif Option == "Golden Hour" then
+          Lighting.ClockTime = 17.5
+          Lighting.Brightness = 3
+          Lighting.Ambient = Color3.fromRGB(255, 200, 100)
+      elseif Option == "RTX Glow" then
+          Lighting.Brightness = 4
+          Lighting.Ambient = Color3.fromRGB(200, 200, 255)
+      elseif Option == "Neon City" then
+          Lighting.ClockTime = 0
+          Lighting.Ambient = Color3.fromRGB(0, 255, 150)
+      elseif Option == "Dark Fantasy" then
+          Lighting.ClockTime = 1
+          Lighting.Ambient = Color3.fromRGB(80, 0, 120)
+      elseif Option == "Pastel World" then
+          Lighting.Ambient = Color3.fromRGB(255, 220, 230)
+      elseif Option == "Soft Bloom" then
+          Lighting.Brightness = 3
+          Lighting.Ambient = Color3.fromRGB(240, 240, 240)
+      elseif Option == "Cinema Dramatic" then
+          Lighting.ClockTime = 19
+          Lighting.Brightness = 1.5
+          Lighting.Ambient = Color3.fromRGB(100, 100, 120)
+      end
+   end,
+})
+
+TabVisual:CreateDropdown({
+   Name = "🌤️ 10 Shaderów Pogody",
+   Options = {"Słonecznie", "Gęsta Mgła", "Ciemna Noc", "Deszczowa Burza", "Śnieżyca", "Krwawy Księżyc", "Zaćmienie", "Złota Mgła", "Pochmurno", "Mroźna Poranek"},
+   CurrentOption = "Słonecznie",
+   Flag = "WeatherDropdown",
+   Callback = function(Option)
+      Lighting.FogEnd = 100000
+      Lighting.ClockTime = 14
+      
+      if Option == "Gęsta Mgła" then
+          Lighting.FogEnd = 150
+          Lighting.FogColor = Color3.fromRGB(200, 200, 200)
+      elseif Option == "Ciemna Noc" then
+          Lighting.ClockTime = 0
+          Lighting.Brightness = 0.2
+      elseif Option == "Deszczowa Burza" then
+          Lighting.ClockTime = 14
+          Lighting.FogEnd = 300
+          Lighting.FogColor = Color3.fromRGB(80, 90, 100)
+      elseif Option == "Śnieżyca" then
+          Lighting.FogEnd = 200
+          Lighting.FogColor = Color3.fromRGB(240, 245, 255)
+      elseif Option == "Krwawy Księżyc" then
+          Lighting.ClockTime = 0
+          Lighting.Ambient = Color3.fromRGB(255, 0, 0)
+      elseif Option == "Zaćmienie" then
+          Lighting.ClockTime = 12
+          Lighting.Brightness = 0.1
+          Lighting.Ambient = Color3.fromRGB(40, 40, 50)
+      elseif Option == "Złota Mgła" then
+          Lighting.FogEnd = 300
+          Lighting.FogColor = Color3.fromRGB(255, 200, 100)
+      elseif Option == "Pochmurno" then
+          Lighting.Brightness = 1
+          Lighting.Ambient = Color3.fromRGB(150, 150, 150)
+      elseif Option == "Mroźna Poranek" then
+          Lighting.ClockTime = 6
+          Lighting.Ambient = Color3.fromRGB(180, 220, 255)
+      end
+   end,
+})
+
+local targetUsername = ""
+TabVisual:CreateInput({
+   Name = "Nazwa gracza do sklonowania",
+   PlaceholderText = "Wpisz nick gracza...",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      targetUsername = Text
+   end,
+})
+
+TabVisual:CreateButton({
+   Name = "Zmień się w wybranego gracza (Apply)",
+   Callback = function()
+      if targetUsername ~= "" then
+          pcall(function()
+              local targetPlayer = Players:FindFirstChild(targetUsername)
+              if targetPlayer and targetPlayer.Character and LocalPlayer.Character then
+                  local userId = targetPlayer.UserId
+                  local humDesc = Players:GetHumanoidDescriptionFromUserId(userId)
+                  if humDesc and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                      LocalPlayer.Character.Humanoid:ApplyDescription(humDesc)
+                  end
+              end
+          end)
+      end
    end,
 })
 
@@ -297,13 +404,21 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    if _G.FreezeAllOn then
+    -- Ruchoma, piękna kula Vortex chodząca za Tobą
+    if _G.VortexActive and vortexOrb and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local root = LocalPlayer.Character.HumanoidRootPart
+        -- Obraca się wokół Ciebie i śledzi Twoją pozycję
+        local angle = tick() * 4
+        local offset = Vector3.new(math.cos(angle) * 6, 2, math.sin(angle) * 6)
+        vortexOrb.Position = root.Position + offset
+        
+        -- Wciąganie graczy w pobliżu poza mapę
         for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                local root = p.Character:FindFirstChild("HumanoidRootPart")
-                if hum then hum.WalkSpeed = 0 end
-                if root then root.Anchored = true end
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local dist = (p.Character.HumanoidRootPart.Position - vortexOrb.Position).Magnitude
+                if dist <= 8 then
+                    p.Character.HumanoidRootPart.CFrame = CFrame.new(0, -500, 0)
+                end
             end
         end
     end
@@ -425,7 +540,7 @@ RunService.Stepped:Connect(function()
         end
     end
 
-    -- ESP Dropped Gun (Leżąca broń)
+    -- ESP Dropped Gun
     if _G.EspGunDropOn then
         for _, v in pairs(Workspace:GetChildren()) do
             if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
@@ -439,33 +554,4 @@ RunService.Stepped:Connect(function()
         end
     else
         for _, v in pairs(Workspace:GetChildren()) do
-            if v:FindFirstChild("GunHighlight") then
-                v.GunHighlight:Destroy()
-            end
-        end
-    end
-end)
-
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if _G.InfJumpOn then
-        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end
-end)
-
-local camera = Workspace.CurrentCamera
-RunService.RenderStepped:Connect(function()
-    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        local rootPart = LocalPlayer.Character.HumanoidRootPart
-        local humanoid = LocalPlayer.Character.Humanoid
-        humanoid.PlatformStand = true
-        local moveDirection = humanoid.MoveDirection
-        local velocity = Vector3.new(0, 0, 0)
-        if moveDirection.Magnitude > 0 then
-            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
-        end
-        rootPart.Velocity = velocity
-    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.PlatformStand = false
-    end
-end)
+            if v:FindFirstChild("GunHigh
