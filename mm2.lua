@@ -1,10 +1,10 @@
--- Jasiu Hub V4 | Murder Mystery 2 (Rayfield + Działający Kalendarz 10 Nagród)
+-- Jasiu Hub V4 | Murder Mystery 2 (Clean & Stable Edition dla Arceus X)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Jasiu Hub V4 🌲 | MM2 Ultimate Pro",
    LoadingTitle = "Ładowanie Jasiu Hub V4...",
-   LoadingSubtitle = "10-dniowy Kalendarz Nagród",
+   LoadingSubtitle = "Oficjalna stabilna wersja",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
@@ -14,7 +14,6 @@ local TabMurder = Window:CreateTab("Murder", 4483362458)
 local TabSheriff = Window:CreateTab("Sheriff", 4483362458)
 local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
 local TabPlayer = Window:CreateTab("Player", 4483362458)
-local TabCalendar = Window:CreateTab("Kalendarz 10D", 4483362458)
 local TabEsp = Window:CreateTab("ESP & Alerts", 4483362458)
 local TabUtility = Window:CreateTab("Utility", 4483362458)
 local TabTroll = Window:CreateTab("Troll", 4483362458)
@@ -120,7 +119,7 @@ TabFarm:CreateToggle({
 })
 
 TabFarm:CreateToggle({
-   Name = "🧲 Coin Aura (Przyciąganie monet)",
+   Name = "🧲 Coin Aura (Przyciąganie monet w promieniu 25m)",
    CurrentValue = false,
    Flag = "CoinAura",
    Callback = function(Value) _G.CoinAuraOn = Value end,
@@ -204,113 +203,6 @@ TabPlayer:CreateToggle({
    CurrentValue = false,
    Flag = "Fly",
    Callback = function(Value) _G.FlyOn = Value end,
-})
-
--------------------------------------------------
--- ZAKŁADKA: KALENDARZ 10 DNI (NAGRODY)
--------------------------------------------------
-TabCalendar:CreateParagraph({Title = "🌲 10-Dniowy Kalendarz Nagród Jasiu Hub", Content = "Kliknij nagrodę z danego dnia, aby natychmiast aktywować unikalny bonus w grze!"})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 1: 🚀 Starter Speed Buff (+Prędkość 24)",
-   Callback = function()
-      _G.SpeedVal = 24
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.WalkSpeed = 24 end
-      Rayfield:Notify({Title = "Dzień 1 Aktywny!", Content = "Ustawiono prędkość WalkSpeed na 24!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 2: 👁️ Wide Vision Unlock (FOV 100°)",
-   Callback = function()
-      _G.FovVal = 100
-      Camera.FieldOfView = 100
-      Rayfield:Notify({Title = "Dzień 2 Aktywny!", Content = "Poszerzono pole widzenia do 100°!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 3: 🧲 Super Coin Magnet (Coin Aura 35m)",
-   Callback = function()
-      _G.CoinAuraOn = true
-      Rayfield:Notify({Title = "Dzień 3 Aktywny!", Content = "Włączono przyciąganie monet!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 4: 🛡️ Emergency Safe Escape (Teleport + Noclip)",
-   Callback = function()
-      _G.NoclipOn = true
-      pcall(function()
-          local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-          if root then root.CFrame = root.CFrame + Vector3.new(0, 50, 0) end
-      end)
-      Rayfield:Notify({Title = "Dzień 4 Aktywny!", Content = "Ucieczka w bezpieczną strefę z Noclipem!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 5: 🎯 Sheriff Precision Aim (Auto-Shoot + Crosshair)",
-   Callback = function()
-      _G.AutoShootSheriff = true
-      Rayfield:Notify({Title = "Dzień 5 Aktywny!", Content = "Silent Aim dla Szeryfa włączony!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 6: ⚡ Razor Kill Aura (Kill Aura 25m)",
-   Callback = function()
-      _G.KillAuraOn = true
-      _G.KillAuraRange = 25
-      Rayfield:Notify({Title = "Dzień 6 Aktywny!", Content = "Kill Aura Pro (25m) gotowa!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 7: 👻 Ghost Mode (Phantom Noclip & Fly)",
-   Callback = function()
-      _G.NoclipOn = true
-      _G.FlyOn = true
-      _G.FlySpeed = 60
-      Rayfield:Notify({Title = "Dzień 7 Aktywny!", Content = "Tryb Ducha (Latanie + Noclip) włączony!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 8: 🔔 Ultimate Radar & ESP Pack",
-   Callback = function()
-      _G.EspRolesOn = true
-      _G.EspNamesOn = true
-      _G.EspCoinsOn = true
-      _G.EspGunDropOn = true
-      Rayfield:Notify({Title = "Dzień 8 Aktywny!", Content = "Wszystkie systemy ESP włączone!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "🎁 Dzień 9: 🌀 Troller Jump Pack",
-   Callback = function()
-      pcall(function()
-          local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-          if root then root.CFrame = root.CFrame + Vector3.new(0, 15, 0) end
-      end)
-      Rayfield:Notify({Title = "Dzień 9 Aktywny!", Content = "Skok-zmyłka wykonany!", Duration = 4, Image = 4483362458})
-   end,
-})
-
-TabCalendar:CreateButton({
-   Name = "👑 Dzień 10: LEGENDARY JASIU STATUS (GOD MODE)",
-   Callback = function()
-      _G.SpeedVal = 30
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.WalkSpeed = 30 end
-      _G.FovVal = 110
-      Camera.FieldOfView = 110
-      _G.EspRolesOn = true
-      _G.EspNamesOn = true
-      _G.CoinAuraOn = true
-      _G.KillAuraOn = true
-      Rayfield:Notify({Title = "👑 GOD MODE AKTYWNY!", Content = "Odblokowano pełną dominację Jasiu Hub V4!", Duration = 7, Image = 4483362458})
-   end,
 })
 
 -------------------------------------------------
@@ -462,7 +354,7 @@ task.spawn(function()
                         if v.Name == "CoinContainer" or v.Name == "Coin" then
                             local part = v:IsA("Model") and v.PrimaryPart or v
                             if part and part:IsA("BasePart") then
-                                if (myRoot.Position - part.Position).Magnitude <= 35 then
+                                if (myRoot.Position - part.Position).Magnitude <= 25 then
                                     part.CFrame = myRoot.CFrame
                                 end
                             end
@@ -561,4 +453,101 @@ RunService.Stepped:Connect(function()
                         bg.Parent = head
                         
                         local txt = Instance.new("TextLabel")
-       
+                        txt.Name = "TagText"
+                        txt.Size = UDim2.new(1, 0, 1, 0)
+                        txt.BackgroundTransparency = 1
+                        txt.TextSize = 13
+                        txt.Font = Enum.Font.SourceSansBold
+                        txt.Parent = bg
+                    end
+                    local t = bg:FindFirstChild("TagText")
+                    if t then
+                        t.Text = p.Name .. "\n[" .. roleStr .. "]"
+                        t.TextColor3 = col
+                    end
+                end
+            else
+                local head = char:FindFirstChild("Head")
+                if head and head:FindFirstChild("JasiuNameTag") then
+                    head.JasiuNameTag:Destroy()
+                end
+            end
+        end
+    end
+    
+    if _G.EspCoinsOn then
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "CoinContainer" or v.Name == "Coin" then
+                if not v:FindFirstChild("CoinHighlight") then
+                    local ch = Instance.new("Highlight")
+                    ch.Name = "CoinHighlight"
+                    ch.FillColor = Color3.fromRGB(255, 215, 0)
+                    ch.Parent = v
+                end
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "CoinHighlight" then v:Destroy() end
+        end
+    end
+    
+    if _G.EspTrapsOn then
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "Trap" or (v.Name and string.lower(v.Name):find("trap")) then
+                if not v:FindFirstChild("TrapHighlight") then
+                    local th = Instance.new("Highlight")
+                    th.Name = "TrapHighlight"
+                    th.FillColor = Color3.fromRGB(255, 128, 0)
+                    th.Parent = v
+                end
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "TrapHighlight" then v:Destroy() end
+        end
+    end
+
+    if _G.EspGunDropOn then
+        for _, v in pairs(Workspace:GetChildren()) do
+            if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
+                if not v:FindFirstChild("GunHighlight") then
+                    local gh = Instance.new("Highlight")
+                    gh.Name = "GunHighlight"
+                    gh.FillColor = Color3.fromRGB(0, 150, 255)
+                    gh.Parent = v
+                end
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetChildren()) do
+            if v:FindFirstChild("GunHighlight") then
+                v.GunHighlight:Destroy()
+            end
+        end
+    end
+end)
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if _G.InfJumpOn then
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        local rootPart = LocalPlayer.Character.HumanoidRootPart
+        local humanoid = LocalPlayer.Character.Humanoid
+        humanoid.PlatformStand = true
+        local moveDirection = humanoid.MoveDirection
+        local velocity = Vector3.new(0, 0, 0)
+        if moveDirection.Magnitude > 0 then
+            velocity = Camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + Camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
+        end
+        rootPart.Velocity = velocity
+    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.PlatformStand = false
+    end
+end)
