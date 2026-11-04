@@ -1,4 +1,4 @@
--- Jasiu Hub V3 | Murder Mystery 2 (Rayfield + Fixed Auto Farm + Pro Auto-Shoot + Godmode)
+-- Jasiu Hub V3 | Murder Mystery 2 (Stabilna wersja + FOV + Safe Zone)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -26,6 +26,7 @@ local CoreGui = game:GetService("CoreGui")
 local TeleportService = game:GetService("TeleportService")
 local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
 
 _G.KillAuraOn = false
 _G.KillAuraRange = 15
@@ -44,7 +45,7 @@ _G.AutoShootSheriff = false
 _G.AutoFarmCoins = false
 _G.CrosshairOn = false
 _G.AntiAfkOn = true
-_G.GodmodeOn = false
+_G.FovVal = 70
 
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
@@ -83,10 +84,10 @@ TabMurder:CreateButton({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: SHERIFF (Ulepszony Auto-Shoot)
+-- ZAKŁADKA: SHERIFF
 -------------------------------------------------
 TabSheriff:CreateToggle({
-   Name = "🎯 PRO Auto-Shoot / Silent Aim (Błyskawiczny strzał)",
+   Name = "🎯 Auto-Shoot / Silent Aim (Strzał w Murderera)",
    CurrentValue = false,
    Flag = "AutoShoot",
    Callback = function(Value) _G.AutoShootSheriff = Value end,
@@ -106,17 +107,17 @@ TabSheriff:CreateButton({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: AUTO FARM (Naprawiony i stabilny)
+-- ZAKŁADKA: AUTO FARM
 -------------------------------------------------
 TabFarm:CreateToggle({
-   Name = "🪙 Auto-Farm Monet (Naprawiony / Płynny)",
+   Name = "🪙 Auto-Farm Monet (Teleport do Coinów)",
    CurrentValue = false,
    Flag = "AutoFarm",
    Callback = function(Value) _G.AutoFarmCoins = Value end,
 })
 
 -------------------------------------------------
--- ZAKŁADKA: PLAYER
+-- ZAKŁADKA: PLAYER (Teraz z FOV i Safe Zone)
 -------------------------------------------------
 TabPlayer:CreateSlider({
    Name = "Prędkość (WalkSpeed)",
@@ -146,6 +147,31 @@ TabPlayer:CreateSlider({
           LocalPlayer.Character.Humanoid.UseJumpPower = true
           LocalPlayer.Character.Humanoid.JumpPower = Value
       end
+   end,
+})
+
+TabPlayer:CreateSlider({
+   Name = "FOV (Pole widzenia)",
+   Range = {70, 120},
+   Increment = 1,
+   Suffix = "°",
+   CurrentValue = 70,
+   Flag = "FovSlider",
+   Callback = function(Value)
+      _G.FovVal = Value
+      Camera.FieldOfView = Value
+   end,
+})
+
+TabPlayer:CreateButton({
+   Name = "🛡️ Safe Zone (Teleport na górę mapy)",
+   Callback = function()
+      pcall(function()
+          local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+          if root then
+              root.CFrame = root.CFrame + Vector3.new(0, 50, 0)
+          end
+      end)
    end,
 })
 
@@ -209,7 +235,7 @@ TabEsp:CreateToggle({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: UTILITY & POLECANE DODATKI
+-- ZAKŁADKA: UTILITY & VISUAL
 -------------------------------------------------
 local crosshairGui = nil
 TabUtility:CreateToggle({
@@ -241,13 +267,6 @@ TabUtility:CreateToggle({
 })
 
 TabUtility:CreateToggle({
-   Name = "🛡️ Godmode / Anti-Damage (Ochrona przed śmiercią)",
-   CurrentValue = false,
-   Flag = "GodmodeToggle",
-   Callback = function(Value) _G.GodmodeOn = Value end,
-})
-
-TabUtility:CreateToggle({
    Name = "🛡️ Anti-AFK (Ochrona przed AFK Kick)",
    CurrentValue = true,
    Flag = "AntiAfkToggle",
@@ -262,7 +281,7 @@ TabUtility:CreateButton({
 })
 
 TabUtility:CreateButton({
-   Name = "🔁 Rejoin (Dołącz ponownie)",
+   Name = "🔁 Rejoin (Dołącz ponownie do tego samego serwera)",
    Callback = function()
       TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
    end,
@@ -286,7 +305,6 @@ TabTroll:CreateButton({
 -------------------------------------------------
 -- GŁÓWNE PĘTLE W TLE
 -------------------------------------------------
--- Anti-AFK
 LocalPlayer.Idled:Connect(function()
     if _G.AntiAfkOn then
         VirtualUser:Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
@@ -295,25 +313,18 @@ LocalPlayer.Idled:Connect(function()
     end
 end)
 
--- Naprawiony i zoptymalizowany Auto Farm Monet
 task.spawn(function()
     while true do
-        task.wait(0.2)
+        task.wait(0.3)
         if _G.AutoFarmCoins and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            pcall(function()
-                for _, v in pairs(Workspace:GetDescendants()) do
-                    if not _G.AutoFarmCoins then break end
-                    if v.Name == "CoinContainer" or v.Name == "Coin" then
-                        if v:IsA("BasePart") or v:IsA("Model") then
-                            local part = v:IsA("Model") and v.PrimaryPart or v
-                            if part then
-                                LocalPlayer.Character.HumanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 2, 0)
-                                task.wait(0.15)
-                            end
-                        end
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v.Name == "CoinContainer" or v.Name == "Coin" then
+                    if v:IsA("BasePart") then
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+                        task.wait(0.2)
                     end
                 end
-            end)
+            end
         end
     end
 end)
@@ -325,16 +336,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Godmode / Ochrona przed obrażeniami
-    if _G.GodmodeOn and LocalPlayer.Character then
-        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum.MaxHealth = math.huge
-            hum.Health = math.huge
-        end
-    end
-    
-    -- Ultra Kill Aura Pro
     if _G.KillAuraOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local myRoot = LocalPlayer.Character.HumanoidRootPart
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
@@ -356,7 +357,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Naprawiony i ultraszybki Auto-Shoot Szeryfa
     if _G.AutoShootSheriff and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local gun = LocalPlayer.Character:FindFirstChild("Gun") or LocalPlayer.Backpack:FindFirstChild("Gun") or LocalPlayer.Character:FindFirstChild("Revolver") or LocalPlayer.Backpack:FindFirstChild("Revolver")
         if gun then
@@ -364,10 +364,7 @@ RunService.Stepped:Connect(function()
                 if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                     local isMurderer = p.Character:FindFirstChild("Knife") or (p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Knife"))
                     if isMurderer then
-                        if gun.Parent ~= LocalPlayer.Character then
-                            gun.Parent = LocalPlayer.Character
-                        end
-                        -- Natychmiastowe ustawienie celownika na Murderera i wystzał
+                        gun.Parent = LocalPlayer.Character
                         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position, p.Character.HumanoidRootPart.Position)
                         pcall(function() gun:Activate() end)
                     end
@@ -376,7 +373,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Szybkie ESP Ról
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local char = p.Character
@@ -442,7 +438,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- ESP Coinów
     if _G.EspCoinsOn then
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "CoinContainer" or v.Name == "Coin" then
@@ -460,7 +455,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- ESP Trapów
     if _G.EspTrapsOn then
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "Trap" or (v.Name and string.lower(v.Name):find("trap")) then
@@ -478,7 +472,6 @@ RunService.Stepped:Connect(function()
         end
     end
 
-    -- ESP Dropped Gun
     if _G.EspGunDropOn then
         for _, v in pairs(Workspace:GetChildren()) do
             if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
@@ -506,7 +499,6 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
-local camera = Workspace.CurrentCamera
 RunService.RenderStepped:Connect(function()
     if _G.FlyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") then
         local rootPart = LocalPlayer.Character.HumanoidRootPart
@@ -515,7 +507,7 @@ RunService.RenderStepped:Connect(function()
         local moveDirection = humanoid.MoveDirection
         local velocity = Vector3.new(0, 0, 0)
         if moveDirection.Magnitude > 0 then
-            velocity = camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
+            velocity = Camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + Camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
         end
         rootPart.Velocity = velocity
     elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
