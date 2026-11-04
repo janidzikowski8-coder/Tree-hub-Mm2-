@@ -1,4 +1,4 @@
--- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Ulepszona Kill Aura Pro + Jumpscare)
+-- Jasiu Hub V2 | Murder Mystery 2 (Rayfield + Lista Graczy + Najmocniejszy Freeze Pro)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -24,7 +24,6 @@ local TabTroll = Window:CreateTab("Troll", 4483362458)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 
 _G.KillAuraOn = false
@@ -40,6 +39,8 @@ _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspNamesOn = false
 _G.EspGunDropOn = false
+_G.SelectedFreezeTarget = ""
+_G.TargetFrozen = false
 
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
@@ -70,9 +71,7 @@ TabMurder:CreateButton({
           for _, p in pairs(Players:GetPlayers()) do
               if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                   LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-                  pcall(function() 
-                      knife:Activate() 
-                  end)
+                  pcall(function() knife:Activate() end)
               end
           end
       end
@@ -189,65 +188,51 @@ TabEsp:CreateToggle({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: TROLL (Jumpscare z listą graczy)
+-- ZAKŁADKA: TROLL (Lista graczy + Najmocniejszy Freeze)
 -------------------------------------------------
-local selectedTargetPlayer = ""
 local playerNamesList = {}
-
 for _, p in pairs(Players:GetPlayers()) do
-    table.insert(playerNamesList, p.Name)
+    if p ~= LocalPlayer then table.insert(playerNamesList, p.Name) end
 end
 
+Players.PlayerAdded:Connect(function(p)
+    if p ~= LocalPlayer then table.insert(playerNamesList, p.Name) end
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+    for i, name in ipairs(playerNamesList) do
+        if name == p.Name then table.remove(playerNamesList, i) end
+    end
+end)
+
 TabTroll:CreateDropdown({
-   Name = "Wybierz gracza do Jumpscare'a",
+   Name = "Wybierz gracza do zamrożenia",
    Options = playerNamesList,
    CurrentOption = "",
-   Flag = "JumpscareTarget",
+   Flag = "FreezeTarget",
    Callback = function(Option)
-      selectedTargetPlayer = Option
+      _G.SelectedFreezeTarget = Option
    end,
 })
 
-TabTroll:CreateButton({
-   Name = "💥 WYŚLIJ MASAKRYCZNY JUMPSCARE (Głośność 10)",
-   Callback = function()
-      local target = Players:FindFirstChild(selectedTargetPlayer)
-      if target then
-          local isMe = (target == LocalPlayer)
-          local vol = isMe and 10 or 8
-          
-          pcall(function()
-              local gui = Instance.new("ScreenGui")
-              gui.Name = "JasiuJumpscareGUI"
-              gui.IgnoreGuiInset = true
-              gui.Parent = CoreGui
-              
-              local bg = Instance.new("Frame")
-              bg.Size = UDim2.new(1, 0, 1, 0)
-              bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-              bg.Parent = gui
-              
-              local img = Instance.new("ImageLabel")
-              img.Size = UDim2.new(1, 0, 1, 0)
-              img.BackgroundTransparency = 1
-              img.Image = "rbxassetid://1793796746194"
-              img.Parent = bg
-              
-              local sound = Instance.new("Sound")
-              sound.SoundId = "rbxassetid://9069603280"
-              sound.Volume = vol
-              sound.Parent = Workspace
-              sound:Play()
-              
-              task.spawn(function()
-                  for i = 1, 30 do
-                      img.Position = UDim2.new(0, math.random(-25, 25), 0, math.random(-25, 25))
-                      task.wait(0.03)
-                  end
-                  gui:Destroy()
-                  sound:Destroy()
-              end)
-          end)
+TabTroll:CreateToggle({
+   Name = "🧊 Ulepszony Masakryczny Freeze (Paraliż)",
+   CurrentValue = false,
+   Flag = "SuperFreezeToggle",
+   Callback = function(Value)
+      _G.TargetFrozen = Value
+      if not Value and _G.SelectedFreezeTarget ~= "" then
+          local target = Players:FindFirstChild(_G.SelectedFreezeTarget)
+          if target and target.Character then
+              local hum = target.Character:FindFirstChildOfClass("Humanoid")
+              local root = target.Character:FindFirstChild("HumanoidRootPart")
+              if hum then 
+                  hum.WalkSpeed = 16 
+                  hum.JumpPower = 50
+                  hum.PlatformStand = false
+              end
+              if root then root.Anchored = false end
+          end
       end
    end,
 })
@@ -274,7 +259,23 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Ulepszony mechanizm Kill Aury Pro
+    -- Najmocniejszy Freeze wybranego gracza w pętli
+    if _G.TargetFrozen and _G.SelectedFreezeTarget ~= "" then
+        local target = Players:FindFirstChild(_G.SelectedFreezeTarget)
+        if target and target.Character then
+            local hum = target.Character:FindFirstChildOfClass("Humanoid")
+            local root = target.Character:FindFirstChild("HumanoidRootPart")
+            if hum then
+                hum.WalkSpeed = 0
+                hum.JumpPower = 0
+                hum.PlatformStand = true
+            end
+            if root then
+                root.Anchored = true
+            end
+        end
+    end
+    
     if _G.KillAuraOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local myRoot = LocalPlayer.Character.HumanoidRootPart
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
