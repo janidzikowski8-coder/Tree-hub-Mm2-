@@ -1,17 +1,17 @@
--- Items Hub | MM2 Clean Edition V1 (Tylko zakładka Start)
+-- Exon Hub V1 | MM2 (Tylko zakładka Start)
 local Success, Rayfield = pcall(function()
     return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 end)
 
 if not Success or not Rayfield then
-    warn("Błąd krytyczny: Nie udało się załadować biblioteki Rayfield!")
+    warn("Błąd: Nie udało się załadować Rayfield UI!")
     return
 end
 
 local Window = Rayfield:CreateWindow({
-   Name = "Items Hub 🌟 | MM2 Pro",
-   LoadingTitle = "Inicjalizacja Items Hub...",
-   LoadingSubtitle = "Czysta wersja główna",
+   Name = "Exon Hub V1 ⚡ | MM2",
+   LoadingTitle = "Ładowanie Exon Hub...",
+   LoadingSubtitle = "Minimalistyczna wersja",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
@@ -20,18 +20,18 @@ local Window = Rayfield:CreateWindow({
 local TabHome = Window:CreateTab("Start", 4483362458)
 
 -------------------------------------------------
--- ZAKŁADKA: START (GŁÓWNA)
+-- ZAKŁADKA: START
 -------------------------------------------------
 TabHome:CreateParagraph({
-   Title = "Witaj w Items Hub!",
-   Content = "Witam w Items hub to script do Mm2 życzę miłego grania V1"
+   Title = "Witaj w Exon Hub!",
+   Content = "Witam w Exon Hub to skrypt do MM2. Życzę miłego grania V1"
 })
 
 TabHome:CreateButton({
    Name = "🎉 Pokaż powiadomienie powitalne",
    Callback = function()
       Rayfield:Notify({
-         Title = "Items Hub V1",
+         Title = "Exon Hub V1",
          Content = "Miłej gry w Murder Mystery 2!",
          Duration = 5,
          Image = 4483362458,
@@ -40,8 +40,8 @@ TabHome:CreateButton({
 })
 
 Rayfield:Notify({
-   Title = "Items Hub V1",
-   Content = "Skrypt uruchomiony pomyślnie!",
+   Title = "Exon Hub V1",
+   Content = "Załadowano pomyślnie!",
    Duration = 5,
    Image = 4483362458,
 })
