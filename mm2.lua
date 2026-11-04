@@ -1,10 +1,10 @@
--- Jasiu Hub V3 | Murder Mystery 2 (Stabilna wersja + FOV + Safe Zone)
+-- Jasiu Hub V4 | Murder Mystery 2 (Ultimate Edition dla Arceus X)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Jasiu Hub V3 🌲 | MM2 Ultimate",
-   LoadingTitle = "Ładowanie Jasiu Hub V3...",
-   LoadingSubtitle = "Dedykowane dla Arceus X",
+   Name = "Jasiu Hub V4 🌲 | MM2 Ultimate Pro",
+   LoadingTitle = "Ładowanie Jasiu Hub V4...",
+   LoadingSubtitle = "Oficjalna wersja V4 dla Arceus X",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
@@ -14,7 +14,7 @@ local TabMurder = Window:CreateTab("Murder", 4483362458)
 local TabSheriff = Window:CreateTab("Sheriff", 4483362458)
 local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
 local TabPlayer = Window:CreateTab("Player", 4483362458)
-local TabEsp = Window:CreateTab("ESP", 4483362458)
+local TabEsp = Window:CreateTab("ESP & Alerts", 4483362458)
 local TabUtility = Window:CreateTab("Utility", 4483362458)
 local TabTroll = Window:CreateTab("Troll", 4483362458)
 
@@ -43,8 +43,10 @@ _G.EspNamesOn = false
 _G.EspGunDropOn = false
 _G.AutoShootSheriff = false
 _G.AutoFarmCoins = false
+_G.CoinAuraOn = false
 _G.CrosshairOn = false
 _G.AntiAfkOn = true
+_G.RoleAlertOn = true
 _G.FovVal = 70
 
 -------------------------------------------------
@@ -116,8 +118,15 @@ TabFarm:CreateToggle({
    Callback = function(Value) _G.AutoFarmCoins = Value end,
 })
 
+TabFarm:CreateToggle({
+   Name = "🧲 Coin Aura (Przyciąganie monet w promieniu 25m)",
+   CurrentValue = false,
+   Flag = "CoinAura",
+   Callback = function(Value) _G.CoinAuraOn = Value end,
+})
+
 -------------------------------------------------
--- ZAKŁADKA: PLAYER (Teraz z FOV i Safe Zone)
+-- ZAKŁADKA: PLAYER
 -------------------------------------------------
 TabPlayer:CreateSlider({
    Name = "Prędkość (WalkSpeed)",
@@ -197,8 +206,15 @@ TabPlayer:CreateToggle({
 })
 
 -------------------------------------------------
--- ZAKŁADKA: ESP
+-- ZAKŁADKA: ESP & ALERTS
 -------------------------------------------------
+TabEsp:CreateToggle({
+   Name = "🔔 Role Alerts (Powiadomienia o roli na starcie)",
+   CurrentValue = true,
+   Flag = "RoleAlertToggle",
+   Callback = function(Value) _G.RoleAlertOn = Value end,
+})
+
 TabEsp:CreateToggle({
    Name = "ESP Ról (Kolory postaci)",
    CurrentValue = false,
@@ -313,19 +329,41 @@ LocalPlayer.Idled:Connect(function()
     end
 end)
 
+-- Auto Farm & Coin Aura
 task.spawn(function()
     while true do
         task.wait(0.3)
-        if _G.AutoFarmCoins and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v.Name == "CoinContainer" or v.Name == "Coin" then
-                    if v:IsA("BasePart") then
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
-                        task.wait(0.2)
+        pcall(function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local myRoot = LocalPlayer.Character.HumanoidRootPart
+                
+                if _G.AutoFarmCoins then
+                    for _, v in pairs(Workspace:GetDescendants()) do
+                        if not _G.AutoFarmCoins then break end
+                        if v.Name == "CoinContainer" or v.Name == "Coin" then
+                            local part = v:IsA("Model") and v.PrimaryPart or v
+                            if part and part:IsA("BasePart") then
+                                myRoot.CFrame = part.CFrame + Vector3.new(0, 2, 0)
+                                task.wait(0.15)
+                            end
+                        end
+                    end
+                end
+                
+                if _G.CoinAuraOn then
+                    for _, v in pairs(Workspace:GetDescendants()) do
+                        if v.Name == "CoinContainer" or v.Name == "Coin" then
+                            local part = v:IsA("Model") and v.PrimaryPart or v
+                            if part and part:IsA("BasePart") then
+                                if (myRoot.Position - part.Position).Magnitude <= 25 then
+                                    part.CFrame = myRoot.CFrame
+                                end
+                            end
+                        end
                     end
                 end
             end
-        end
+        end)
     end
 end)
 
