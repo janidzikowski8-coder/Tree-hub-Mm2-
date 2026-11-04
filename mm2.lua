@@ -1,4 +1,4 @@
--- Jasiu Hub V3 | Murder Mystery 2 (Rayfield + Coin Aura + Spectate + Role Alerts)
+-- Jasiu Hub V3 | Murder Mystery 2 (Rayfield + Coin Aura + Spectate Naprawione + Role Alerts)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -48,6 +48,7 @@ _G.CrosshairOn = false
 _G.AntiAfkOn = true
 _G.GodmodeOn = false
 _G.RoleAlertOn = false
+_G.SpectateActive = false
 
 -------------------------------------------------
 -- ZAKŁADKA: MURDER
@@ -218,13 +219,6 @@ TabEsp:CreateToggle({
    Callback = function(Value) _G.EspGunDropOn = Value end,
 })
 
-TabEsp:CreateToggle({
-   Name = "🚨 Powiadomienia o rolach (Role Alert)",
-   CurrentValue = false,
-   Flag = "RoleAlert",
-   Callback = function(Value) _G.RoleAlertOn = Value end,
-})
-
 -------------------------------------------------
 -- ZAKŁADKA: UTILITY & SPECTATE
 -------------------------------------------------
@@ -279,18 +273,21 @@ TabUtility:CreateToggle({
    CurrentValue = false,
    Flag = "SpectateToggle",
    Callback = function(Value)
+      _G.SpectateActive = Value
       if Value and spectateTarget ~= "" then
           task.spawn(function()
               while _G.SpectateActive do
                   task.wait()
                   local targetP = Players:FindFirstChild(spectateTarget)
-                  if targetP and targetP.Character and targetP.Character:FindFirstChild("HumanoidRootPart") then
+                  if targetP and targetP.Character and targetP.Character:FindFirstChild("Humanoid") then
                       Camera.CameraSubject = targetP.Character.Humanoid
                   end
               end
           end)
       else
-          Camera.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") or nil
+          if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+              Camera.CameraSubject = LocalPlayer.Character.Humanoid
+          end
       end
    end,
 })
@@ -570,4 +567,5 @@ end)
 
 game:GetService("UserInputService").JumpRequest:Connect(function()
     if _G.InfJumpOn then
-        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+        if hum then hum:ChangeState(Enum.HumanoidS
