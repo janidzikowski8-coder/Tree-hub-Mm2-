@@ -1,4 +1,4 @@
--- Exon Hub V1 | Murder Mystery 2 (Rozbudowana wersja)
+-- Jasiu Hub 4V | Shazam Edition & MM2
 local Success, Rayfield = pcall(function()
     return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 end)
@@ -9,9 +9,9 @@ if not Success or not Rayfield then
 end
 
 local Window = Rayfield:CreateWindow({
-   Name = "Exon Hub V1 ⚡ | MM2 Pro",
-   LoadingTitle = "Ładowanie Exon Hub...",
-   LoadingSubtitle = "Rozbudowana wersja",
+   Name = "Jasiu Hub 4V ⚡ | Shazam Edition",
+   LoadingTitle = "Ładowanie Jasiu Hub 4V...",
+   LoadingSubtitle = "Shazam Style",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
@@ -41,7 +41,6 @@ _G.EspCoinsOn = false
 _G.EspTrapsOn = false
 _G.EspGunDropOn = false
 
--- Kolory ESP dla ról
 _G.MurderColor = Color3.fromRGB(255, 0, 0)
 _G.SheriffColor = Color3.fromRGB(0, 120, 255)
 _G.InnocentColor = Color3.fromRGB(0, 255, 0)
@@ -59,8 +58,8 @@ local TabTroll = Window:CreateTab("Troll", 4483362458)
 -- ZAKŁADKA: START
 -------------------------------------------------
 TabHome:CreateParagraph({
-   Title = "Witaj w Exon Hub!",
-   Content = "Witam w Exon Hub to skrypt do MM2. Życzę miłego grania V1"
+   Title = "Witaj w Jasiu Hub 4V (Shazam)!",
+   Content = "Zaawansowany skrypt do MM2. Miłej zabawy!"
 })
 
 -------------------------------------------------
@@ -111,7 +110,7 @@ TabPlayer:CreateSlider({
 })
 
 TabPlayer:CreateToggle({
-   Name = "Noclip (Przenikanie przez ściany)",
+   Name = "Noclip (Przenikanie)",
    CurrentValue = false,
    Flag = "NoclipToggle",
    Callback = function(Value) _G.NoclipOn = Value end,
@@ -152,7 +151,7 @@ TabMurder:CreateSlider({
 })
 
 TabMurder:CreateButton({
-   Name = "🔥 KILL ALL (Teleport do żywych graczy w rundzie)",
+   Name = "🔥 KILL ALL (Teleport tylko do żywych w rundzie)",
    Callback = function()
       local knife = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife"))
       if knife then
@@ -160,7 +159,6 @@ TabMurder:CreateButton({
           for _, p in pairs(Players:GetPlayers()) do
               if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                   local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                  -- Sprawdzamy czy gracz żyje i jest w rundzie (np. ma więcej niż 0 HP)
                   if hum and hum.Health > 0 then
                       LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
                       pcall(function() knife:Activate() end)
@@ -176,14 +174,14 @@ TabMurder:CreateButton({
 -- ZAKŁADKA: SHERIFF
 -------------------------------------------------
 TabSheriff:CreateToggle({
-   Name = "🎯 Auto-Shoot Murderer (Strzał przez ściany)",
+   Name = "🎯 Auto-Shoot Murderer (Przez ściany)",
    CurrentValue = false,
    Flag = "AutoShootToggle",
    Callback = function(Value) _G.AutoShootSheriff = Value end,
 })
 
 TabSheriff:CreateButton({
-   Name = "🔫 Strzał w Mordercę natychmiast (Jednorazowy)",
+   Name = "🔫 Strzał w Mordercę natychmiast",
    Callback = function()
       pcall(function()
           local gun = LocalPlayer.Character:FindFirstChild("Gun") or LocalPlayer.Backpack:FindFirstChild("Gun") or LocalPlayer.Character:FindFirstChild("Revolver") or LocalPlayer.Backpack:FindFirstChild("Revolver")
@@ -203,28 +201,11 @@ TabSheriff:CreateButton({
    end,
 })
 
-TabSheriff:CreateButton({
-   Name = "🎯 Auto-Namierz celownik na Mordercę",
-   Callback = function()
-      pcall(function()
-          for _, p in pairs(Players:GetPlayers()) do
-              if p ~= LocalPlayer and p.Character then
-                  local bp = p:FindFirstChild("Backpack")
-                  local isMurderer = (bp and bp:FindFirstChild("Knife")) or p.Character:FindFirstChild("Knife")
-                  if isMurderer and p.Character:FindFirstChild("Head") then
-                      Camera.CFrame = CFrame.new(Camera.CFrame.Position, p.Character.Head.Position)
-                  end
-              end
-          end
-      end)
-   end,
-})
-
 -------------------------------------------------
 -- ZAKŁADKA: ESP & ALERTS
 -------------------------------------------------
 TabEsp:CreateToggle({
-   Name = "ESP Ról (Kolory postacie)",
+   Name = "ESP Ról (Kolory postaci)",
    CurrentValue = false,
    Flag = "EspRolesToggle",
    Callback = function(Value) _G.EspRolesOn = Value end,
@@ -245,36 +226,35 @@ TabEsp:CreateToggle({
 })
 
 TabEsp:CreateToggle({
-   Name = "ESP Trapów (Ulepszone z dystansem)",
+   Name = "ESP Trapów",
    CurrentValue = false,
    Flag = "EspTrapsToggle",
    Callback = function(Value) _G.EspTrapsOn = Value end,
 })
 
 TabEsp:CreateToggle({
-   Name = "ESP Dropped Gun (Ulepszone z info o brionii)",
+   Name = "ESP Dropped Gun",
    CurrentValue = false,
    Flag = "EspGunDropToggle",
    Callback = function(Value) _G.EspGunDropOn = Value end,
 })
 
--- Wybór kolorów ról w ESP
 TabEsp:CreateColorPicker({
-   Name = "Kolor Mordercy w ESP",
+   Name = "Kolor Mordercy",
    Color = Color3.fromRGB(255, 0, 0),
    Flag = "MurderColorPicker",
    Callback = function(Value) _G.MurderColor = Value end,
 })
 
 TabEsp:CreateColorPicker({
-   Name = "Kolor Szeryfa w ESP",
+   Name = "Kolor Szeryfa",
    Color = Color3.fromRGB(0, 120, 255),
    Flag = "SheriffColorPicker",
    Callback = function(Value) _G.SheriffColor = Value end,
 })
 
 TabEsp:CreateColorPicker({
-   Name = "Kolor Niewinnego w ESP",
+   Name = "Kolor Niewinnego",
    Color = Color3.fromRGB(0, 255, 0),
    Flag = "InnocentColorPicker",
    Callback = function(Value) _G.InnocentColor = Value end,
@@ -287,8 +267,7 @@ TabTeleport:CreateButton({
    Name = "📍 Teleport do Lobby",
    Callback = function()
       pcall(function()
-          if Workspace:FindFirstChild("Lobby") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-              -- Przykładowa pozycja lobby lub szukanie spawnu
+          if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
               LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
           end
       end)
@@ -296,7 +275,7 @@ TabTeleport:CreateButton({
 })
 
 TabTeleport:CreateButton({
-   Name = "🗺️ Teleport na Mapę (Gra)",
+   Name = "🗺️ Teleport na Mapę",
    Callback = function()
       pcall(function()
           for _, v in pairs(Workspace:GetChildren()) do
@@ -312,7 +291,7 @@ TabTeleport:CreateButton({
 })
 
 TabTeleport:CreateButton({
-   Name = "gun drop teleport (Do upuszczonej broni)",
+   Name = "🔫 Teleport do upuszczonej broni",
    Callback = function()
       for _, v in pairs(Workspace:GetChildren()) do
           if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
@@ -338,7 +317,7 @@ TabTroll:CreateButton({
 })
 
 TabTroll:CreateButton({
-   Name = "🚀 Wywal gracza poza mapę (Fling Nearest)",
+   Name = "🚀 Wywal gracza poza mapę (Fling)",
    Callback = function()
       pcall(function()
           local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -377,7 +356,7 @@ TabTroll:CreateButton({
 })
 
 -------------------------------------------------
--- PĘTLE W TLE (LOGIKA)
+-- PĘTLE W TLE
 -------------------------------------------------
 RunService.Stepped:Connect(function()
     if _G.NoclipOn and LocalPlayer.Character then
@@ -420,7 +399,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- ESP Aktualizacje
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local char = p.Character
@@ -439,24 +417,24 @@ RunService.Stepped:Connect(function()
             end
             
             if _G.EspRolesOn then
-                local hl = char:FindFirstChild("ExonESP")
+                local hl = char:FindFirstChild("JasiuESP")
                 if not hl then
                     hl = Instance.new("Highlight")
-                    hl.Name = "ExonESP"
+                    hl.Name = "JasiuESP"
                     hl.Parent = char
                 end
                 hl.FillColor = col
             else
-                if char:FindFirstChild("ExonESP") then char.ExonESP:Destroy() end
+                if char:FindFirstChild("JasiuESP") then char.JasiuESP:Destroy() end
             end
             
             if _G.EspNamesOn then
                 local head = char:FindFirstChild("Head")
                 if head then
-                    local bg = head:FindFirstChild("ExonNameTag")
+                    local bg = head:FindFirstChild("JasiuNameTag")
                     if not bg then
                         bg = Instance.new("BillboardGui")
-                        bg.Name = "ExonNameTag"
+                        bg.Name = "JasiuNameTag"
                         bg.Size = UDim2.new(0, 100, 0, 40)
                         bg.StudsOffset = Vector3.new(0, 2.5, 0)
                         bg.AlwaysOnTop = true
@@ -478,54 +456,7 @@ RunService.Stepped:Connect(function()
                 end
             else
                 local head = char:FindFirstChild("Head")
-                if head and head:FindFirstChild("ExonNameTag") then head.ExonNameTag:Destroy() end
-            end
-        end
-    end
-    
-    if _G.EspCoinsOn then
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v.Name == "CoinContainer" or v.Name == "Coin" then
-                if not v:FindFirstChild("CoinHighlight") then
-                    local ch = Instance.new("Highlight")
-                    ch.Name = "CoinHighlight"
-                    ch.FillColor = Color3.fromRGB(255, 215, 0)
-                    ch.Parent = v
-                end
-            end
-        end
-    else
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v.Name == "CoinHighlight" then v:Destroy() end
-        end
-    end
-    
-    if _G.EspTrapsOn then
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v.Name == "Trap" or (v.Name and string.lower(v.Name):find("trap")) then
-                if not v:FindFirstChild("TrapHighlight") then
-                    local th = Instance.new("Highlight")
-                    th.Name = "TrapHighlight"
-                    th.FillColor = Color3.fromRGB(255, 128, 0)
-                    th.Parent = v
-                end
-            end
-        end
-    else
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v.Name == "TrapHighlight" then v:Destroy() end
-        end
-    end
-
-    if _G.EspGunDropOn then
-        for _, v in pairs(Workspace:GetChildren()) do
-            if v.Name == "GunDrop" or (v:IsA("Tool") and v.Name ~= "Knife" and v.Name ~= "Gun") then
-                if not v:FindFirstChild("GunHighlight") then
-                    local gh = Instance.new("Highlight")
-                    gh.Name = "GunHighlight"
-                    gh.FillColor = Color3.fromRGB(0, 150, 255)
-                    gh.Parent = v
-                end
+                if head and head:FindFirstChild("JasiuNameTag") then head.JasiuNameTag:Destroy() end
             end
         end
     end
@@ -546,4 +477,17 @@ RunService.RenderStepped:Connect(function()
         local moveDirection = humanoid.MoveDirection
         local velocity = Vector3.new(0, 0, 0)
         if moveDirection.Magnitude > 0 then
-            velocity = Camera.CFrame.L
+            velocity = Camera.CFrame.LookVector * (moveDirection.Z * _G.FlySpeed) + Camera.CFrame.RightVector * (moveDirection.X * _G.FlySpeed)
+        end
+        rootPart.Velocity = velocity
+    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.PlatformStand = false
+    end
+end)
+
+Rayfield:Notify({
+   Title = "Jasiu Hub 4V",
+   Content = "Wszystkie systemy Shazam załadowane pomyślnie!",
+   Duration = 5,
+   Image = 4483362458,
+})
